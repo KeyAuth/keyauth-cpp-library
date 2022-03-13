@@ -541,6 +541,21 @@ bool KeyAuth::api::checkblack() {
 	}
 }
 
+void KeyAuth::api::check() {
+	safety();
+	auto data =
+		XorStr("type=check") +
+		XorStr("&sessionid=") + sessionid +
+		XorStr("&name=") + name +
+		XorStr("&ownerid=") + ownerid;
+
+	auto response = req(data, url, sslPin);
+	safety();
+	auto json = response_decoder.parse(response);
+
+	load_response_data(json);
+}
+
 std::string KeyAuth::api::var(std::string varid) {
 	safety();
 	auto data =
