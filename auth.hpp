@@ -43,7 +43,7 @@ namespace KeyAuth {
 			std::string hwid;
 			std::string createdate;
 			std::string lastlogin;
-			std::string subscription;
+			std::vector<std::string> subscriptions;
 			std::string expiry;
 			// response data
 			bool success;
@@ -61,7 +61,7 @@ namespace KeyAuth {
 			api::data.hwid = data["hwid"];
 			api::data.createdate = data["createdate"];
 			api::data.lastlogin = data["lastlogin"];
-			api::data.subscription = data["subscriptions"][0]["subscription"];
+			for (auto sub : data["subscriptions"]) api::data.subscriptions.push_back(sub["subscription"]);
 			api::data.expiry = data["subscriptions"][0]["expiry"];
 		}
 
