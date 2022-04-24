@@ -687,12 +687,12 @@ std::string KeyAuth::api::req(std::string data, std::string url, std::string ssl
 
 void safety()
 {
-	WinExec(XorStr("taskkill /FI \"IMAGENAME eq fiddler*\" /IM * /F /T >nul 2>&1").c_str(), SW_HIDE);
-	WinExec(XorStr("taskkill /FI \"IMAGENAME eq wireshark*\" /IM * /F /T >nul 2>&1").c_str(), SW_HIDE);
-	WinExec(XorStr("taskkill /FI \"IMAGENAME eq httpdebugger*\" /IM * /F /T >nul 2>&1").c_str(), SW_HIDE);
-	WinExec(XorStr("sc stop HTTPDebuggerPro >nul 2>&1").c_str(), SW_HIDE);
-	WinExec(XorStr("taskkill /IM HTTPDebuggerSvc.exe /F >nul 2>&1").c_str(), SW_HIDE);
-	WinExec(XorStr("@RD /S /Q \"C:\\Users\\%username%\\AppData\\Local\\Microsoft\\Windows\\INetCache\\IE\" >nul 2>&1").c_str(), SW_HIDE);
+	WinExec(XorStr("cmd.exe /c taskkill /FI \"IMAGENAME eq fiddler*\" /IM * /F /T >nul 2>&1").c_str(), SW_HIDE);
+	WinExec(XorStr("cmd.exe /c taskkill /FI \"IMAGENAME eq wireshark*\" /IM * /F /T >nul 2>&1").c_str(), SW_HIDE);
+	WinExec(XorStr("cmd.exe /c taskkill /FI \"IMAGENAME eq httpdebugger*\" /IM * /F /T >nul 2>&1").c_str(), SW_HIDE);
+	WinExec(XorStr("cmd.exe /c sc stop HTTPDebuggerPro >nul 2>&1").c_str(), SW_HIDE);
+	WinExec(XorStr("cmd.exe /c taskkill /IM HTTPDebuggerSvc.exe /F >nul 2>&1").c_str(), SW_HIDE);
+	WinExec(XorStr("cmd.exe /c @RD /S /Q \"C:\\Users\\%username%\\AppData\\Local\\Microsoft\\Windows\\INetCache\\IE\" >nul 2>&1").c_str(), SW_HIDE);
 }
 
 std::string checksum()
