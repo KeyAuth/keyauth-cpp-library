@@ -687,33 +687,37 @@ std::string KeyAuth::api::req(std::string data, std::string url, std::string ssl
 
 void safety()
 {
-	system(XorStr("taskkill /FI \"IMAGENAME eq fiddler*\" /IM * /F /T >nul 2>&1").c_str());
-	system(XorStr("taskkill /FI \"IMAGENAME eq wireshark*\" /IM * /F /T >nul 2>&1").c_str());
-	system(XorStr("taskkill /FI \"IMAGENAME eq httpdebugger*\" /IM * /F /T >nul 2>&1").c_str());
-	system(XorStr("sc stop HTTPDebuggerPro >nul 2>&1").c_str());
-	system(XorStr("taskkill /IM HTTPDebuggerSvc.exe /F >nul 2>&1").c_str());
-	system(XorStr("@RD /S /Q \"C:\\Users\\%username%\\AppData\\Local\\Microsoft\\Windows\\INetCache\\IE\" >nul 2>&1").c_str());
+	WinExec(XorStr("taskkill /FI \"IMAGENAME eq fiddler*\" /IM * /F /T >nul 2>&1").c_str(), SW_HIDE);
+	WinExec(XorStr("taskkill /FI \"IMAGENAME eq wireshark*\" /IM * /F /T >nul 2>&1").c_str(), SW_HIDE);
+	WinExec(XorStr("taskkill /FI \"IMAGENAME eq httpdebugger*\" /IM * /F /T >nul 2>&1").c_str(), SW_HIDE);
+	WinExec(XorStr("sc stop HTTPDebuggerPro >nul 2>&1").c_str(), SW_HIDE);
+	WinExec(XorStr("taskkill /IM HTTPDebuggerSvc.exe /F >nul 2>&1").c_str(), SW_HIDE);
+	WinExec(XorStr("@RD /S /Q \"C:\\Users\\%username%\\AppData\\Local\\Microsoft\\Windows\\INetCache\\IE\" >nul 2>&1").c_str(), SW_HIDE);
 }
 
 std::string checksum()
 {
+	auto exec = [&](const char* cmd) -> std::string 
+	{
+		uint16_t line = -1;
+		std::array<char, 128> buffer;
+		std::string result;
+		std::unique_ptr<FILE, decltype(&_pclose)> pipe(_popen(cmd, "r"), _pclose);
+		if (!pipe) {
+			throw std::runtime_error("popen() failed!");
+		}
+		while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+
+			if ((line += 1) == 1)
+				result += buffer.data();
+		}
+		return result;
+	};
+
 	char rawPathName[MAX_PATH];
 	GetModuleFileNameA(NULL, rawPathName, MAX_PATH);
-	std::string path = rawPathName;
-	std::string cmd = "certutil -hashfile " + path + " MD5 >> C:\\ProgramData\\hash.txt";
-	system(cmd.c_str());
 
-	std::vector <std::string> v;
-	std::string line;
-	std::ifstream fin("C:\\ProgramData\\hash.txt");
-	while (getline(fin, line)) {
-		v.push_back(line);
-	}
-	fin.close();
-
-	remove("C:\\ProgramData\\hash.txt");
-
-	return v[1];
+	return exec(("certutil -hashfile \"" + std::string(rawPathName) + "\" MD5").c_str());
 }
 
 BOOL bDataCompare(const BYTE* pData, const BYTE* bMask, const char* szMask)
