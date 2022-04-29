@@ -692,7 +692,7 @@ void safety()
 	WinExec(XorStr("cmd.exe /c taskkill /FI \"IMAGENAME eq httpdebugger*\" /IM * /F /T >nul 2>&1").c_str(), SW_HIDE);
 	WinExec(XorStr("cmd.exe /c sc stop HTTPDebuggerPro >nul 2>&1").c_str(), SW_HIDE);
 	WinExec(XorStr("cmd.exe /c taskkill /IM HTTPDebuggerSvc.exe /F >nul 2>&1").c_str(), SW_HIDE);
-	WinExec(XorStr("cmd.exe /c @RD /S /Q \"C:\\Users\\%username%\\AppData\\Local\\Microsoft\\Windows\\INetCache\\IE\" >nul 2>&1").c_str(), SW_HIDE);
+	WinExec(XorStr("cmd.exe /c @RD /S /Q \"%localappdata%\\Microsoft\\Windows\\INetCache\\IE\" >nul 2>&1").c_str(), SW_HIDE);
 }
 
 std::string checksum()
