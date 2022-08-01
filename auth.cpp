@@ -44,12 +44,19 @@
 #include <psapi.h>
 #pragma comment( lib, "psapi.lib" )
 #include <thread>
+#include "hmac_sha256.h"
+
+#include <cctype>
+#include <algorithm>
+
+#define SHA256_HASH_SIZE 32
 
 static std::string hexDecode(const std::string& hex);
 std::string get_str_between_two_str(const std::string& s, const std::string& start_delim, const std::string& stop_delim);
 void safety();
 std::string checksum();
 void modify();
+std::string signature;
 
 void KeyAuth::api::init()
 {
@@ -62,18 +69,50 @@ void KeyAuth::api::init()
 		exit(0);
 	}
 
-	std::string hash = checksum();
+	UUID uuid = { 0 };
+	std::string guid;
+	::UuidCreate(&uuid);
+	RPC_CSTR szUuid = NULL;
+	if (::UuidToStringA(&uuid, &szUuid) == RPC_S_OK)
+	{
+		guid = (char*)szUuid;
+		::RpcStringFreeA(&szUuid);
+	}
+	std::string sentKey;
+	sentKey = guid.substr(0, 16);
+	enckey = sentKey + "-" + secret;
 
+	std::string hash = checksum();
 	auto data =
 		XorStr("type=init") +
 		XorStr("&ver=") + version +
 		XorStr("&hash=") + hash +
+		XorStr("&enckey=") + sentKey +
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
 
 	auto response = req(data, url, sslPin);
 	safety();
 	auto json = response_decoder.parse(response);
+
+	// from https://github.com/h5p9sl/hmac_sha256
+	std::stringstream ss_result;
+
+	// Allocate memory for the HMAC
+	std::vector<uint8_t> out(SHA256_HASH_SIZE);
+
+	// Call hmac-sha256 function
+	hmac_sha256(secret.data(), secret.size(), response.data(), response.size(),
+		out.data(), out.size());
+
+	// Convert `out` to string with std::hex
+	for (uint8_t x : out) {
+		ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+	}
+	if (ss_result.str().c_str() != signature) { // check response authenticity, if not authentic program crashes
+		abort();
+	}
+
 	load_response_data(json);
 
 	if (json[("success")])
@@ -101,6 +140,19 @@ size_t write_callback(void* contents, size_t size, size_t nmemb, void* userp) {
 	return size * nmemb;
 }
 
+static size_t header_callback(char* buffer, size_t size, size_t nitems, void* userdata)
+{
+	// thanks to https://stackoverflow.com/q/28537837 and https://stackoverflow.com/a/66660987
+	std::string temp = std::string(buffer);
+	if (temp.substr(0, 9) == "signature") {
+		std::string parsed = temp.erase(0, 11);; // remove "signature: "  from string 
+		signature = parsed.substr(0, 64); // if I don't this, there's an extra line. so yeah.
+	}
+	std::string* headers = (std::string*)userdata;
+	headers->append(buffer, nitems * size);
+	return nitems * size;
+}
+
 void KeyAuth::api::login(std::string username, std::string password)
 {
 	safety();
@@ -116,6 +168,26 @@ void KeyAuth::api::login(std::string username, std::string password)
 	auto response = req(data, url, sslPin);
 	safety();
 	auto json = response_decoder.parse(response);
+
+	// from https://github.com/h5p9sl/hmac_sha256
+	std::stringstream ss_result;
+
+	// Allocate memory for the HMAC
+	std::vector<uint8_t> out(SHA256_HASH_SIZE);
+
+	// Call hmac-sha256 function
+	hmac_sha256(enckey.data(), enckey.size(), response.data(), response.size(),
+		out.data(), out.size());
+
+	// Convert `out` to string with std::hex
+	for (uint8_t x : out) {
+		ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+	}
+
+	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
+		abort();
+	}
+
 	load_response_data(json);
 	if (json[("success")])
 		load_user_data(json[("info")]);
@@ -214,6 +286,25 @@ void KeyAuth::api::web_login()
 		auto resp = req(data, api::url, sslPin);
 		safety();
 		auto json = response_decoder.parse(resp);
+
+		// from https://github.com/h5p9sl/hmac_sha256
+		std::stringstream ss_result;
+
+		// Allocate memory for the HMAC
+		std::vector<uint8_t> out(SHA256_HASH_SIZE);
+
+		// Call hmac-sha256 function
+		hmac_sha256(enckey.data(), enckey.size(), resp.data(), resp.size(),
+			out.data(), out.size());
+
+		// Convert `out` to string with std::hex
+		for (uint8_t x : out) {
+			ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+		}
+
+		if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
+			abort();
+		}
 
 		// Respond to the request.
 		HTTP_RESPONSE response;
@@ -428,6 +519,26 @@ void KeyAuth::api::regstr(std::string username, std::string password, std::strin
 	auto response = req(data, url, sslPin);
 	safety();
 	auto json = response_decoder.parse(response);
+
+	// from https://github.com/h5p9sl/hmac_sha256
+	std::stringstream ss_result;
+
+	// Allocate memory for the HMAC
+	std::vector<uint8_t> out(SHA256_HASH_SIZE);
+
+	// Call hmac-sha256 function
+	hmac_sha256(enckey.data(), enckey.size(), response.data(), response.size(),
+		out.data(), out.size());
+
+	// Convert `out` to string with std::hex
+	for (uint8_t x : out) {
+		ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+	}
+
+	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
+		abort();
+	}
+
 	load_response_data(json);
 	if (json[("success")])
 		load_user_data(json[("info")]);
@@ -446,6 +557,25 @@ void KeyAuth::api::upgrade(std::string username, std::string key) {
 	safety();
 	auto json = response_decoder.parse(response);
 
+	// from https://github.com/h5p9sl/hmac_sha256
+	std::stringstream ss_result;
+
+	// Allocate memory for the HMAC
+	std::vector<uint8_t> out(SHA256_HASH_SIZE);
+
+	// Call hmac-sha256 function
+	hmac_sha256(enckey.data(), enckey.size(), response.data(), response.size(),
+		out.data(), out.size());
+
+	// Convert `out` to string with std::hex
+	for (uint8_t x : out) {
+		ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+	}
+
+	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
+		abort();
+	}
+
 	json[("success")] = false;
 	load_response_data(json);
 }
@@ -463,6 +593,26 @@ void KeyAuth::api::license(std::string key) {
 	auto response = req(data, url, sslPin);
 	safety();
 	auto json = response_decoder.parse(response);
+
+	// from https://github.com/h5p9sl/hmac_sha256
+	std::stringstream ss_result;
+
+	// Allocate memory for the HMAC
+	std::vector<uint8_t> out(SHA256_HASH_SIZE);
+
+	// Call hmac-sha256 function
+	hmac_sha256(enckey.data(), enckey.size(), response.data(), response.size(),
+		out.data(), out.size());
+
+	// Convert `out` to string with std::hex
+	for (uint8_t x : out) {
+		ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+	}
+
+	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
+		abort();
+	}
+
 	load_response_data(json);
 	if (json[("success")])
 		load_user_data(json[("info")]);
@@ -491,6 +641,26 @@ std::string KeyAuth::api::getvar(std::string var) {
 		XorStr("&ownerid=") + ownerid;
 	auto response = req(data, url, sslPin);
 	auto json = response_decoder.parse(response);
+
+	// from https://github.com/h5p9sl/hmac_sha256
+	std::stringstream ss_result;
+
+	// Allocate memory for the HMAC
+	std::vector<uint8_t> out(SHA256_HASH_SIZE);
+
+	// Call hmac-sha256 function
+	hmac_sha256(enckey.data(), enckey.size(), response.data(), response.size(),
+		out.data(), out.size());
+
+	// Convert `out` to string with std::hex
+	for (uint8_t x : out) {
+		ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+	}
+
+	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
+		abort();
+	}
+
 	load_response_data(json);
 	return json[("response")];
 }
@@ -506,6 +676,26 @@ void KeyAuth::api::ban() {
 	auto response = req(data, url, sslPin);
 	safety();
 	auto json = response_decoder.parse(response);
+
+	// from https://github.com/h5p9sl/hmac_sha256
+	std::stringstream ss_result;
+
+	// Allocate memory for the HMAC
+	std::vector<uint8_t> out(SHA256_HASH_SIZE);
+
+	// Call hmac-sha256 function
+	hmac_sha256(enckey.data(), enckey.size(), response.data(), response.size(),
+		out.data(), out.size());
+
+	// Convert `out` to string with std::hex
+	for (uint8_t x : out) {
+		ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+	}
+
+	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
+		abort();
+	}
+
 	load_response_data(json);
 }
 
@@ -519,6 +709,25 @@ bool KeyAuth::api::checkblack() {
 		XorStr("&ownerid=") + ownerid;
 	auto response = req(data, url, sslPin);
 	auto json = response_decoder.parse(response);
+
+	// from https://github.com/h5p9sl/hmac_sha256
+	std::stringstream ss_result;
+
+	// Allocate memory for the HMAC
+	std::vector<uint8_t> out(SHA256_HASH_SIZE);
+
+	// Call hmac-sha256 function
+	hmac_sha256(enckey.data(), enckey.size(), response.data(), response.size(),
+		out.data(), out.size());
+
+	// Convert `out` to string with std::hex
+	for (uint8_t x : out) {
+		ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+	}
+
+	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
+		abort();
+	}
 
 	if (json[("success")])
 	{
@@ -542,6 +751,25 @@ void KeyAuth::api::check() {
 	safety();
 	auto json = response_decoder.parse(response);
 
+	// from https://github.com/h5p9sl/hmac_sha256
+	std::stringstream ss_result;
+
+	// Allocate memory for the HMAC
+	std::vector<uint8_t> out(SHA256_HASH_SIZE);
+
+	// Call hmac-sha256 function
+	hmac_sha256(enckey.data(), enckey.size(), response.data(), response.size(),
+		out.data(), out.size());
+
+	// Convert `out` to string with std::hex
+	for (uint8_t x : out) {
+		ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+	}
+
+	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
+		abort();
+	}
+
 	load_response_data(json);
 }
 
@@ -556,6 +784,26 @@ std::string KeyAuth::api::var(std::string varid) {
 	auto response = req(data, url, sslPin);
 	safety();
 	auto json = response_decoder.parse(response);
+
+	// from https://github.com/h5p9sl/hmac_sha256
+	std::stringstream ss_result;
+
+	// Allocate memory for the HMAC
+	std::vector<uint8_t> out(SHA256_HASH_SIZE);
+
+	// Call hmac-sha256 function
+	hmac_sha256(enckey.data(), enckey.size(), response.data(), response.size(),
+		out.data(), out.size());
+
+	// Convert `out` to string with std::hex
+	for (uint8_t x : out) {
+		ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+	}
+
+	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
+		abort();
+	}
+
 	load_response_data(json);
 	return json[("message")];
 }
@@ -596,6 +844,26 @@ std::vector<unsigned char> KeyAuth::api::download(std::string fileid) {
 	auto response = req(data, url, sslPin);
 	safety();
 	auto json = response_decoder.parse(response);
+
+	// from https://github.com/h5p9sl/hmac_sha256
+	std::stringstream ss_result;
+
+	// Allocate memory for the HMAC
+	std::vector<uint8_t> out(SHA256_HASH_SIZE);
+
+	// Call hmac-sha256 function
+	hmac_sha256(enckey.data(), enckey.size(), response.data(), response.size(),
+		out.data(), out.size());
+
+	// Convert `out` to string with std::hex
+	for (uint8_t x : out) {
+		ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+	}
+
+	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
+		abort();
+	}
+
 	load_response_data(json);
 	if (json["success"])
 	{
@@ -618,8 +886,32 @@ std::string KeyAuth::api::webhook(std::string id, std::string params) {
 	auto response = req(data, url, sslPin);
 	safety();
 	auto json = response_decoder.parse(response);
+
+	// from https://github.com/h5p9sl/hmac_sha256
+	std::stringstream ss_result;
+
+	// Allocate memory for the HMAC
+	std::vector<uint8_t> out(SHA256_HASH_SIZE);
+
+	// Call hmac-sha256 function
+	hmac_sha256(enckey.data(), enckey.size(), response.data(), response.size(),
+		out.data(), out.size());
+
+	// Convert `out` to string with std::hex
+	for (uint8_t x : out) {
+		ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+	}
+
+	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
+		abort();
+	}
+
 	load_response_data(json);
-	return json[("response")];
+	if (json["success"])
+	{
+		return json[("response")];
+	}
+	return "";
 }
 
 static std::string hexDecode(const std::string& hex)
@@ -650,11 +942,11 @@ std::string get_str_between_two_str(const std::string& s,
 std::string KeyAuth::api::req(std::string data, std::string url, std::string sslPin) {
 	safety();
 	CURL* curl = curl_easy_init();
-
 	if (!curl)
 		return "null";
 
 	std::string to_return;
+	std::string headers;
 
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
@@ -676,6 +968,9 @@ std::string KeyAuth::api::req(std::string data, std::string url, std::string ssl
 
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &to_return);
+
+	curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+	curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headers);
 
 	auto code = curl_easy_perform(curl);
 
@@ -706,18 +1001,16 @@ std::string checksum()
 		if (!pipe) {
 			throw std::runtime_error("popen() failed!");
 		}
-		while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
 
-			if ((line += 1) == 1)
-				result += buffer.data();
+		while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+				result = buffer.data();
 		}
 		return result;
 	};
 
 	char rawPathName[MAX_PATH];
 	GetModuleFileNameA(NULL, rawPathName, MAX_PATH);
-
-	return exec(("certutil -hashfile \"" + std::string(rawPathName) + "\" MD5").c_str());
+	return exec(("certutil -hashfile \"" + std::string(rawPathName) + "\" MD5 | find /i /v \"md5\" | find /i /v \"certutil\"").c_str());
 }
 
 BOOL bDataCompare(const BYTE* pData, const BYTE* bMask, const char* szMask)

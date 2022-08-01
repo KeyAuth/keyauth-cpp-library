@@ -5,13 +5,10 @@
 std::string utils::get_hwid() {
 	ATL::CAccessToken accessToken;
 	ATL::CSid currentUserSid;
-	if (accessToken.GetProcessToken(TOKEN_READ | TOKEN_QUERY) && accessToken.GetUser(&currentUserSid))
+	if (accessToken.GetProcessToken(TOKEN_READ | TOKEN_QUERY) &&
+		accessToken.GetUser(&currentUserSid))
 		return std::string(CT2A(currentUserSid.Sid()));
-	else
-	{
-		MessageBoxA(0, "Couldn't Get HWID Indentifier, Contact Developer for help...", 0, 0);
-		__fastfail(420);
-	}
+	return "none";
 }
 
 std::time_t utils::string_to_timet(std::string timestamp) {
