@@ -90,6 +90,12 @@ void KeyAuth::api::init()
 		XorStr("&ownerid=") + ownerid;
 
 	auto response = req(data, url);
+
+	if (response == "KeyAuth_Invalid") {
+		MessageBoxA(0, XorStr("Application not found. Please copy strings directly from dashboard.").c_str(), NULL, MB_ICONERROR);
+		exit(0);
+	}
+
 	auto json = response_decoder.parse(response);
 
 	// from https://github.com/h5p9sl/hmac_sha256
