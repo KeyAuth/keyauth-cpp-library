@@ -246,8 +246,6 @@ void KeyAuth::api::web_login()
 			NULL
 		);
 
-		going = false;
-
 		// Display some information about the request.
 		// wprintf(L"Full URL: %ws\n", pRequest->CookedUrl.pFullUrl);
 		// wprintf(L"    Path: %ws\n", pRequest->CookedUrl.pAbsPath);
@@ -260,12 +258,62 @@ void KeyAuth::api::web_login()
 
 		// std::cout << get_str_between_two_str(CW2A(pRequest->CookedUrl.pQueryString), "?", "&") << std::endl;
 
-		// Break from the loop if it's the poison pill (a DELETE request).
-		// if (pRequest->Verb == HttpVerbDELETE)
-		// {
-		// 	wprintf(L"Asked to stop.\n");
-		// 	break;
-		// }
+		// break if preflight request from browser
+		if (pRequest->Verb == HttpVerbOPTIONS)
+		{
+			// Respond to the request.
+			HTTP_RESPONSE response;
+			RtlZeroMemory(&response, sizeof(response));
+
+			response.StatusCode = 200;
+			response.pReason = "OK";
+			response.ReasonLength = (USHORT)strlen(response.pReason);
+
+			response.Headers.KnownHeaders[HttpHeaderServer].pRawValue = "Apache/2.4.48 nginx/1.12.2"; // confuse anyone looking at server header
+			response.Headers.KnownHeaders[HttpHeaderServer].RawValueLength = 24;
+
+			response.Headers.KnownHeaders[HttpHeaderVia].pRawValue = "hugzho's big brain";
+			response.Headers.KnownHeaders[HttpHeaderVia].RawValueLength = 18;
+
+			response.Headers.KnownHeaders[HttpHeaderRetryAfter].pRawValue = "never lmao";
+			response.Headers.KnownHeaders[HttpHeaderRetryAfter].RawValueLength = 10;
+
+			response.Headers.KnownHeaders[HttpHeaderLocation].pRawValue = "your kernel ;)";
+			response.Headers.KnownHeaders[HttpHeaderLocation].RawValueLength = 14;
+
+			// https://social.msdn.microsoft.com/Forums/vstudio/en-US/6d468747-2221-4f4a-9156-f98f355a9c08/using-httph-to-set-up-an-https-server-that-is-queried-by-a-client-that-uses-cross-origin-requests?forum=vcgeneral
+			HTTP_UNKNOWN_HEADER  accessControlHeader;
+			const char testCustomHeader[] = "Access-Control-Allow-Origin";
+			const char testCustomHeaderVal[] = "*";
+			accessControlHeader.pName = testCustomHeader;
+			accessControlHeader.NameLength = _countof(testCustomHeader) - 1;
+			accessControlHeader.pRawValue = testCustomHeaderVal;
+			accessControlHeader.RawValueLength = _countof(testCustomHeaderVal) - 1;
+			response.Headers.pUnknownHeaders = &accessControlHeader;
+			response.Headers.UnknownHeaderCount = 1;
+			// Add an entity chunk to the response.
+			// PSTR pEntityString = "Hello from C++";
+			HTTP_DATA_CHUNK dataChunk;
+			dataChunk.DataChunkType = HttpDataChunkFromMemory;
+
+			result = HttpSendHttpResponse(
+				requestQueueHandle,
+				pRequest->RequestId,
+				0,
+				&response,
+				NULL,
+				NULL,   // &bytesSent (optional)
+				NULL,
+				0,
+				NULL,
+				NULL
+			);
+
+			delete[]buffer;
+			continue;
+		}
+
+		going = false;
 
 		// keyauth request
 		std::string hwid = utils::get_hwid();
