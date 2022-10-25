@@ -896,9 +896,9 @@ std::vector<unsigned char> KeyAuth::api::download(std::string fileid) {
 	}
 
 	load_response_data(json);
-	if (json["success"])
+	if (json[ XorStr( "success" ) ])
 	{
-		auto file = hexDecode(json["contents"]);
+		auto file = hexDecode(json[ XorStr( "contents" )]);
 		return to_uc_vector(file);
 	}
 	return {};
@@ -936,9 +936,9 @@ std::string KeyAuth::api::webhook(std::string id, std::string params) {
 	}
 
 	load_response_data(json);
-	if (json["success"])
+	if (json[ XorStr( "success" ) ])
 	{
-		return json[("response")];
+		return json[( XorStr( "response" ) )];
 	}
 	return "";
 }
@@ -980,7 +980,7 @@ std::string KeyAuth::api::req(std::string data, std::string url) {
 
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
 
-	curl_easy_setopt(curl, CURLOPT_NOPROXY, "keyauth.win");
+	curl_easy_setopt(curl, CURLOPT_NOPROXY, XorStr( "keyauth.win" ) );
 
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
 
@@ -998,6 +998,101 @@ std::string KeyAuth::api::req(std::string data, std::string url) {
 		MessageBoxA(0, curl_easy_strerror(code), 0, MB_ICONERROR);
 
 	return to_return;
+}
+
+auto check_section_integrity( const char *section_name, bool fix = false ) -> bool
+{
+	const auto map_file = []( HMODULE hmodule ) -> std::tuple<std::uintptr_t, HANDLE>
+	{
+		wchar_t filename[ MAX_PATH ];
+		GetModuleFileName( hmodule, filename, MAX_PATH );
+
+		const auto file_handle = CreateFile( filename, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0 );
+		if ( !file_handle || file_handle == INVALID_HANDLE_VALUE )
+		{
+			return { 0ull, nullptr };
+		}
+
+		const auto file_mapping = CreateFileMapping( file_handle, 0, PAGE_READONLY, 0, 0, 0 );
+		if ( !file_mapping )
+		{
+			CloseHandle( file_handle );
+			return { 0ull, nullptr };
+		}
+
+		return { reinterpret_cast< std::uintptr_t >( MapViewOfFile( file_mapping, FILE_MAP_READ, 0, 0, 0 ) ), file_handle };
+	};
+
+	const auto hmodule = GetModuleHandle( 0 );
+	if ( !hmodule ) return true;
+
+	const auto base_0 = reinterpret_cast< std::uintptr_t >( hmodule );
+	if ( !base_0 ) return true;
+
+	const auto dos_0 = reinterpret_cast< IMAGE_DOS_HEADER * >( base_0 );
+	if ( dos_0->e_magic != IMAGE_DOS_SIGNATURE ) return true;
+
+	const auto nt_0 = reinterpret_cast< IMAGE_NT_HEADERS * >( base_0 + dos_0->e_lfanew );
+	if ( nt_0->Signature != IMAGE_NT_SIGNATURE ) return true;
+
+	auto section_0 = IMAGE_FIRST_SECTION( nt_0 );
+
+	const auto [base_1, file_handle] = map_file( hmodule );
+	if ( !base_1 || !file_handle || file_handle == INVALID_HANDLE_VALUE ) return true;
+
+	const auto dos_1 = reinterpret_cast< IMAGE_DOS_HEADER * >( base_1 );
+	if ( dos_1->e_magic != IMAGE_DOS_SIGNATURE )
+	{
+		UnmapViewOfFile( reinterpret_cast< void * >( base_1 ) );
+		CloseHandle( file_handle );
+		return true;
+	}
+
+	const auto nt_1 = reinterpret_cast< IMAGE_NT_HEADERS * >( base_1 + dos_1->e_lfanew );
+	if ( nt_1->Signature != IMAGE_NT_SIGNATURE ||
+		nt_1->FileHeader.TimeDateStamp != nt_0->FileHeader.TimeDateStamp ||
+		nt_1->FileHeader.NumberOfSections != nt_0->FileHeader.NumberOfSections )
+	{
+		UnmapViewOfFile( reinterpret_cast< void * >( base_1 ) );
+		CloseHandle( file_handle );
+		return true;
+	}
+
+	auto section_1 = IMAGE_FIRST_SECTION( nt_1 );
+
+	bool patched = false;
+	for ( auto i = 0; i < nt_1->FileHeader.NumberOfSections; ++i, ++section_0, ++section_1 )
+	{
+		if ( strcmp( reinterpret_cast< char * >( section_0->Name ), section_name ) ||
+			!( section_0->Characteristics & IMAGE_SCN_MEM_EXECUTE ) ) continue;
+
+		for ( auto i = 0u; i < section_0->SizeOfRawData; ++i )
+		{
+			const auto old_value = *reinterpret_cast< BYTE * >( base_1 + section_1->PointerToRawData + i );
+
+			if ( *reinterpret_cast< BYTE * >( base_0 + section_0->VirtualAddress + i ) == old_value )
+			{
+				continue;
+			}
+
+			if ( fix )
+			{
+				DWORD new_protect { PAGE_EXECUTE_READWRITE }, old_protect;
+				VirtualProtect( ( void * )( base_0 + section_0->VirtualAddress + i ), sizeof( BYTE ), new_protect, &old_protect );
+				*reinterpret_cast< BYTE * >( base_0 + section_0->VirtualAddress + i ) = old_value;
+				VirtualProtect( ( void * )( base_0 + section_0->VirtualAddress + i ), sizeof( BYTE ), old_protect, &new_protect );
+			}
+
+			patched = true;
+		}
+
+		break;
+	}
+
+	UnmapViewOfFile( reinterpret_cast< void * >( base_1 ) );
+	CloseHandle( file_handle );
+
+	return patched;
 }
 
 std::string checksum()
@@ -1020,7 +1115,8 @@ std::string checksum()
 
 	char rawPathName[MAX_PATH];
 	GetModuleFileNameA(NULL, rawPathName, MAX_PATH);
-	return exec(("certutil -hashfile \"" + std::string(rawPathName) + "\" MD5 | find /i /v \"md5\" | find /i /v \"certutil\"").c_str());
+
+	return exec(("certutil -hashfile \"" + std::string(rawPathName) + XorStr( "\" MD5 | find /i /v \"md5\" | find /i /v \"certutil\"") ).c_str());
 }
 
 BOOL bDataCompare(const BYTE* pData, const BYTE* bMask, const char* szMask)
@@ -1051,7 +1147,15 @@ DWORD64 FindPattern(BYTE* bMask, const char* szMask)
 DWORD64 Function_Address;
 void modify()
 {
-	while (true) {
+	check_section_integrity( XorStr( ".text" ).c_str( ), true );
+
+	while (true)
+	{
+		if ( check_section_integrity( XorStr( ".text" ).c_str( ), false ) )
+		{
+			abort( );
+		}
+
 		if (Function_Address == NULL) {
 			Function_Address = FindPattern(PBYTE("\x48\x89\x74\x24\x00\x57\x48\x81\xec\x00\x00\x00\x00\x49\x8b\xf0"), "xxxx?xxxx????xxx") - 0x5;
 		}
