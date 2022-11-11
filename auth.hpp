@@ -58,7 +58,12 @@ namespace KeyAuth {
 		void load_user_data(nlohmann::json data) {
 			api::data.username = data["username"];
 			api::data.ip = data["ip"];
-			api::data.hwid = data["hwid"];
+			if (data["hwid"].is_null()) {
+				api::data.hwid = "none";
+			}
+			else {
+				api::data.hwid = data["hwid"];
+			}
 			api::data.createdate = data["createdate"];
 			api::data.lastlogin = data["lastlogin"];
 			for (auto sub : data["subscriptions"]) api::data.subscriptions.push_back(sub["subscription"]);
