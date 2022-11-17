@@ -705,10 +705,11 @@ std::string KeyAuth::api::getvar(std::string var) {
 	return json[("response")];
 }
 
-void KeyAuth::api::ban() {
-	std::string hwid = utils::get_hwid();
+void KeyAuth::api::ban(std::string reason) {
+
 	auto data =
 		XorStr("type=ban") +
+		XorStr("&reason=") + reason +
 		XorStr("&sessionid=") + sessionid +
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
