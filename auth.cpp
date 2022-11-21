@@ -49,6 +49,8 @@
 #include <cctype>
 #include <algorithm>
 
+#include "Security.hpp"
+
 #define SHA256_HASH_SIZE 32
 
 static std::string hexDecode(const std::string& hex);
@@ -1156,7 +1158,10 @@ void modify()
 		{
 			abort( );
 		}
-
+		if(!LockMemAccess())
+		{
+			abort( );
+		}
 		if (Function_Address == NULL) {
 			Function_Address = FindPattern(PBYTE("\x48\x89\x74\x24\x00\x57\x48\x81\xec\x00\x00\x00\x00\x49\x8b\xf0"), "xxxx?xxxx????xxx") - 0x5;
 		}

@@ -214,6 +214,7 @@
     <ClInclude Include="nlohmann\ordered_map.hpp" />
     <ClInclude Include="nlohmann\thirdparty\hedley\hedley.hpp" />
     <ClInclude Include="nlohmann\thirdparty\hedley\hedley_undef.hpp" />
+    <ClInclude Include="Security.hpp" />
     <ClInclude Include="sha256.h" />
     <ClInclude Include="utils.hpp" />
     <ClInclude Include="xorstr.hpp" />
