@@ -946,6 +946,43 @@ std::string KeyAuth::api::webhook(std::string id, std::string params) {
 	return "";
 }
 
+void KeyAuth::api::chatget(std::string channel)
+{
+	auto data =
+		XorStr("type=chatget") +
+		XorStr("&channel=") + channel +
+		XorStr("&sessionid=") + sessionid +
+		XorStr("&name=") + name +
+		XorStr("&ownerid=") + ownerid;
+
+	auto response = req(data, url);
+	auto json = response_decoder.parse(response);
+	load_channel_data(json);
+}
+
+bool KeyAuth::api::chatsend(std::string message, std::string channel)
+{
+	auto data =
+		XorStr("type=chatsend") +
+		XorStr("&message=") + message +
+		XorStr("&channel=") + channel +
+		XorStr("&sessionid=") + sessionid +
+		XorStr("&name=") + name +
+		XorStr("&ownerid=") + ownerid;
+
+	auto response = req(data, url);
+	auto json = response_decoder.parse(response);
+	load_response_data(json);
+	if (json[("success")])
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 static std::string hexDecode(const std::string& hex)
 {
 	int len = hex.length();
