@@ -907,11 +907,14 @@ std::vector<unsigned char> KeyAuth::api::download(std::string fileid) {
 	return {};
 }
 
-std::string KeyAuth::api::webhook(std::string id, std::string params) {
+std::string KeyAuth::api::webhook(std::string id, std::string params, std::string body, std::string contenttype)
+{
 	auto data =
 		XorStr("type=webhook") +
 		XorStr("&webid=") + id +
 		XorStr("&params=") + params +
+		XorStr("&body=") + body + 
+		XorStr("&conttype=") + contenttype +
 		XorStr("&sessionid=") + sessionid +
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
