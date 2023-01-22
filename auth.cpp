@@ -704,7 +704,7 @@ std::string KeyAuth::api::getvar(std::string var) {
 	}
 
 	load_response_data(json);
-	return json[("response")];
+	return !json[(XorStr("response"))].is_null() ? json[(XorStr("response"))] : "";
 }
 
 void KeyAuth::api::ban(std::string reason) {
