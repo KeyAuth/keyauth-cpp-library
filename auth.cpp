@@ -21,7 +21,8 @@
 
 #include <sstream> 
 #include <iomanip> 
-#include "xorstr.hpp"
+#include <xorstr.hpp>
+#include <lazy importer.hpp>
 #include <fstream> 
 #include <http.h>
 #include <stdlib.h>
@@ -61,26 +62,26 @@ std::string signature;
 
 void KeyAuth::api::init()
 {
-	CreateThread(0, 0, (LPTHREAD_START_ROUTINE)modify, 0, 0, 0);
+	LI_FN(CreateThread).get()(0, 0, (LPTHREAD_START_ROUTINE)modify, 0, 0, 0);
 
 	if (ownerid.length() != 10 || secret.length() != 64)
 	{
-		MessageBoxA(0, XorStr("Application Not Setup Correctly. Please Watch Video Linked in main.cpp").c_str(), NULL, MB_ICONERROR);
+		LI_FN(MessageBoxA).get()(0, XorStr("Application Not Setup Correctly. Please Watch Video Linked in main.cpp").c_str(), NULL, MB_ICONERROR);
 		exit(0);
 	}
 
 	UUID uuid = { 0 };
 	std::string guid;
-	::UuidCreate(&uuid);
+	LI_FN(UuidCreate).get()(&uuid);
 	RPC_CSTR szUuid = NULL;
-	if (::UuidToStringA(&uuid, &szUuid) == RPC_S_OK)
+	if (LI_FN(UuidToStringA).get()(&uuid, &szUuid) == RPC_S_OK)
 	{
 		guid = (char*)szUuid;
-		::RpcStringFreeA(&szUuid);
+		LI_FN(RpcStringFreeA).get()(&szUuid);
 	}
 	std::string sentKey;
 	sentKey = guid.substr(0, 16);
-	enckey = sentKey + "-" + secret;
+	enckey = sentKey + XorStr("-") + secret;
 
 	std::string hash = checksum();
 	auto data =
@@ -93,9 +94,9 @@ void KeyAuth::api::init()
 
 	auto response = req(data, url);
 
-	if (response == "KeyAuth_Invalid") {
-		MessageBoxA(0, XorStr("Application not found. Please copy strings directly from dashboard.").c_str(), NULL, MB_ICONERROR);
-		exit(0);
+	if (response == XorStr("KeyAuth_Invalid")) {
+		LI_FN(MessageBoxA).get()(0, XorStr("Application not found. Please copy strings directly from dashboard.").c_str(), NULL, MB_ICONERROR);
+		LI_FN(exit)(0);
 	}
 
 	auto json = response_decoder.parse(response);
@@ -120,23 +121,23 @@ void KeyAuth::api::init()
 
 	load_response_data(json);
 
-	if (json[("success")])
+	if (json[(XorStr("success"))])
 	{
-		sessionid = json[("sessionid")];
-		load_app_data(json[("appinfo")]);
+		sessionid = json[(XorStr("sessionid"))];
+		load_app_data(json[(XorStr("appinfo"))]);
 	}
-	else if (json[("message")] == "invalidver")
+	else if (json[(XorStr("message"))] == XorStr("invalidver"))
 	{
-		std::string dl = json[("download")];
+		std::string dl = json[(XorStr("download"))];
 		if (dl == "")
 		{
-			MessageBoxA(0, XorStr("Version in the loader does match the one on the dashboard, and the download link on dashboard is blank.\n\nTo fix this, either fix the loader so it matches the version on the dashboard. Or if you intended for it to have different versions, update the download link on dashboard so it will auto-update correctly.").c_str(), NULL, MB_ICONERROR);
+			LI_FN(MessageBoxA).get()(0, XorStr("Version in the loader does match the one on the dashboard, and the download link on dashboard is blank.\n\nTo fix this, either fix the loader so it matches the version on the dashboard. Or if you intended for it to have different versions, update the download link on dashboard so it will auto-update correctly.").c_str(), NULL, MB_ICONERROR);
 		}
 		else
 		{
-			ShellExecuteA(0, "open", dl.c_str(), 0, 0, SW_SHOWNORMAL);
+			LI_FN(ShellExecuteA).get()(0, XorStr("open").c_str(), dl.c_str(), 0, 0, SW_SHOWNORMAL);
 		}
-		exit(0);
+		LI_FN(exit)(0);
 	}
 }
 
@@ -188,12 +189,12 @@ void KeyAuth::api::login(std::string username, std::string password)
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		abort();
+		LI_FN(abort)();
 	}
 
 	load_response_data(json);
-	if (json[("success")])
-		load_user_data(json[("info")]);
+	if (json[(XorStr("success"))])
+		load_user_data(json[(XorStr("info"))]);
 }
 
 void KeyAuth::api::chatget(std::string channel)
@@ -311,19 +312,19 @@ void KeyAuth::api::web_login()
 			RtlZeroMemory(&response, sizeof(response));
 
 			response.StatusCode = 200;
-			response.pReason = "OK";
+			response.pReason = static_cast<PCSTR>(XorStr("OK").c_str());
 			response.ReasonLength = (USHORT)strlen(response.pReason);
 
-			response.Headers.KnownHeaders[HttpHeaderServer].pRawValue = "Apache/2.4.48 nginx/1.12.2"; // confuse anyone looking at server header
+			response.Headers.KnownHeaders[HttpHeaderServer].pRawValue = XorStr("Apache/2.4.48 nginx/1.12.2").c_str(); // confuse anyone looking at server header
 			response.Headers.KnownHeaders[HttpHeaderServer].RawValueLength = 24;
 
-			response.Headers.KnownHeaders[HttpHeaderVia].pRawValue = "hugzho's big brain";
+			response.Headers.KnownHeaders[HttpHeaderVia].pRawValue = XorStr("hugzho's big brain").c_str();
 			response.Headers.KnownHeaders[HttpHeaderVia].RawValueLength = 18;
 
-			response.Headers.KnownHeaders[HttpHeaderRetryAfter].pRawValue = "never lmao";
+			response.Headers.KnownHeaders[HttpHeaderRetryAfter].pRawValue = XorStr("never lmao").c_str();
 			response.Headers.KnownHeaders[HttpHeaderRetryAfter].RawValueLength = 10;
 
-			response.Headers.KnownHeaders[HttpHeaderLocation].pRawValue = "your kernel ;)";
+			response.Headers.KnownHeaders[HttpHeaderLocation].pRawValue = XorStr("your kernel ;)").c_str();
 			response.Headers.KnownHeaders[HttpHeaderLocation].RawValueLength = 14;
 
 			// https://social.msdn.microsoft.com/Forums/vstudio/en-US/6d468747-2221-4f4a-9156-f98f355a9c08/using-httph-to-set-up-an-https-server-that-is-queried-by-a-client-that-uses-cross-origin-requests?forum=vcgeneral
@@ -389,7 +390,7 @@ void KeyAuth::api::web_login()
 		}
 
 		if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-			abort();
+			LI_FN(abort)();
 		}
 
 		// Respond to the request.
@@ -397,33 +398,33 @@ void KeyAuth::api::web_login()
 		RtlZeroMemory(&response, sizeof(response));
 
 		bool success = true;
-		if (json[("success")])
+		if (json[(XorStr("success"))])
 		{
-			load_user_data(json[("info")]);
+			load_user_data(json[(XorStr("info"))]);
 
 			response.StatusCode = 420;
-			response.pReason = "SHEESH";
+			response.pReason = XorStr("SHEESH").c_str();
 			response.ReasonLength = (USHORT)strlen(response.pReason);
 		}
 		else
 		{
 			response.StatusCode = 200;
-			response.pReason = std::string(json[("message")]).c_str();
+			response.pReason = static_cast<std::string>(json[(XorStr("message"))]).c_str();
 			response.ReasonLength = (USHORT)strlen(response.pReason);
 			success = false;
 		}
 		// end keyauth request
 
-		response.Headers.KnownHeaders[HttpHeaderServer].pRawValue = "Apache/2.4.48 nginx/1.12.2"; // confuse anyone looking at server header
+		response.Headers.KnownHeaders[HttpHeaderServer].pRawValue = XorStr("Apache/2.4.48 nginx/1.12.2").c_str(); // confuse anyone looking at server header
 		response.Headers.KnownHeaders[HttpHeaderServer].RawValueLength = 24;
 
-		response.Headers.KnownHeaders[HttpHeaderVia].pRawValue = "hugzho's big brain";
+		response.Headers.KnownHeaders[HttpHeaderVia].pRawValue = XorStr("hugzho's big brain").c_str();
 		response.Headers.KnownHeaders[HttpHeaderVia].RawValueLength = 18;
 
-		response.Headers.KnownHeaders[HttpHeaderRetryAfter].pRawValue = "never lmao";
+		response.Headers.KnownHeaders[HttpHeaderRetryAfter].pRawValue = XorStr("never lmao").c_str();
 		response.Headers.KnownHeaders[HttpHeaderRetryAfter].RawValueLength = 10;
 
-		response.Headers.KnownHeaders[HttpHeaderLocation].pRawValue = "your kernel ;)";
+		response.Headers.KnownHeaders[HttpHeaderLocation].pRawValue = XorStr("your kernel ;)").c_str();
 		response.Headers.KnownHeaders[HttpHeaderLocation].RawValueLength = 14;
 
 		// https://social.msdn.microsoft.com/Forums/vstudio/en-US/6d468747-2221-4f4a-9156-f98f355a9c08/using-httph-to-set-up-an-https-server-that-is-queried-by-a-client-that-uses-cross-origin-requests?forum=vcgeneral
@@ -542,19 +543,19 @@ void KeyAuth::api::button(std::string button)
 		HTTP_RESPONSE response;
 		RtlZeroMemory(&response, sizeof(response));
 		response.StatusCode = 420;
-		response.pReason = "SHEESH";
+		response.pReason = XorStr("SHEESH").c_str();
 		response.ReasonLength = (USHORT)strlen(response.pReason);
 
-		response.Headers.KnownHeaders[HttpHeaderServer].pRawValue = "Apache/2.4.48 nginx/1.12.2"; // confuse anyone looking at server header
+		response.Headers.KnownHeaders[HttpHeaderServer].pRawValue = XorStr("Apache/2.4.48 nginx/1.12.2").c_str(); // confuse anyone looking at server header
 		response.Headers.KnownHeaders[HttpHeaderServer].RawValueLength = 24;
 
-		response.Headers.KnownHeaders[HttpHeaderVia].pRawValue = "hugzho's big brain";
+		response.Headers.KnownHeaders[HttpHeaderVia].pRawValue = XorStr("hugzho's big brain").c_str();
 		response.Headers.KnownHeaders[HttpHeaderVia].RawValueLength = 18;
 
-		response.Headers.KnownHeaders[HttpHeaderRetryAfter].pRawValue = "never lmao";
+		response.Headers.KnownHeaders[HttpHeaderRetryAfter].pRawValue = XorStr("never lmao").c_str();
 		response.Headers.KnownHeaders[HttpHeaderRetryAfter].RawValueLength = 10;
 
-		response.Headers.KnownHeaders[HttpHeaderLocation].pRawValue = "your kernel ;)";
+		response.Headers.KnownHeaders[HttpHeaderLocation].pRawValue = XorStr("your kernel ;)").c_str();
 		response.Headers.KnownHeaders[HttpHeaderLocation].RawValueLength = 14;
 
 		// https://social.msdn.microsoft.com/Forums/vstudio/en-US/6d468747-2221-4f4a-9156-f98f355a9c08/using-httph-to-set-up-an-https-server-that-is-queried-by-a-client-that-uses-cross-origin-requests?forum=vcgeneral
@@ -619,12 +620,12 @@ void KeyAuth::api::regstr(std::string username, std::string password, std::strin
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		abort();
+		LI_FN(abort)();
 	}
 
 	load_response_data(json);
-	if (json[("success")])
-		load_user_data(json[("info")]);
+	if (json[(XorStr("success"))])
+		load_user_data(json[(XorStr("info"))]);
 }
 
 void KeyAuth::api::upgrade(std::string username, std::string key) {
@@ -654,10 +655,10 @@ void KeyAuth::api::upgrade(std::string username, std::string key) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		abort();
+		LI_FN(abort)();
 	}
 
-	json[("success")] = false;
+	json[(XorStr("success"))] = false;
 	load_response_data(json);
 }
 
@@ -689,12 +690,12 @@ void KeyAuth::api::license(std::string key) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		abort();
+		LI_FN(abort)();
 	}
 
 	load_response_data(json);
-	if (json[("success")])
-		load_user_data(json[("info")]);
+	if (json[(XorStr("success"))])
+		load_user_data(json[(XorStr("info"))]);
 }
 
 void KeyAuth::api::setvar(std::string var, std::string vardata) {
@@ -737,7 +738,7 @@ std::string KeyAuth::api::getvar(std::string var) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		abort();
+		LI_FN(abort)();
 	}
 
 	load_response_data(json);
@@ -771,7 +772,7 @@ void KeyAuth::api::ban(std::string reason) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		abort();
+		LI_FN(abort)();
 	}
 
 	load_response_data(json);
@@ -804,10 +805,10 @@ bool KeyAuth::api::checkblack() {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		abort();
+		LI_FN(abort)();
 	}
 
-	if (json[("success")])
+	if (json[(XorStr("success"))])
 	{
 		return true;
 	}
@@ -875,18 +876,18 @@ std::string KeyAuth::api::var(std::string varid) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		abort();
+		LI_FN(abort)();
 	}
 
 	load_response_data(json);
-	return json[("message")];
+	return json[(XorStr("message"))];
 }
 
 void KeyAuth::api::log(std::string message) {
 
 	char acUserName[100];
 	DWORD nUserName = sizeof(acUserName);
-	GetUserNameA(acUserName, &nUserName);
+	LI_FN(GetUserNameA)(acUserName, &nUserName);
 	std::string UsernamePC = acUserName;
 
 	auto data =
@@ -932,7 +933,7 @@ std::vector<unsigned char> KeyAuth::api::download(std::string fileid) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		abort();
+		LI_FN(abort)();
 	}
 
 	load_response_data(json);
@@ -944,11 +945,15 @@ std::vector<unsigned char> KeyAuth::api::download(std::string fileid) {
 	return {};
 }
 
-std::string KeyAuth::api::webhook(std::string id, std::string params) {
+
+std::string KeyAuth::api::webhook(std::string id, std::string params, std::string body, std::string contenttype)
+{
 	auto data =
 		XorStr("type=webhook") +
 		XorStr("&webid=") + id +
 		XorStr("&params=") + params +
+		XorStr("&body=") + body + 
+		XorStr("&conttype=") + contenttype +
 		XorStr("&sessionid=") + sessionid +
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
@@ -972,7 +977,7 @@ std::string KeyAuth::api::webhook(std::string id, std::string params) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		abort();
+		LI_FN(abort)();
 	}
 
 	load_response_data(json);
@@ -1011,7 +1016,7 @@ std::string get_str_between_two_str(const std::string& s,
 std::string KeyAuth::api::req(std::string data, std::string url) {
 	CURL* curl = curl_easy_init();
 	if (!curl)
-		return "null";
+		return XorStr("null");
 
 	std::string to_return;
 	std::string headers;
@@ -1144,7 +1149,7 @@ std::string checksum()
 		std::string result;
 		std::unique_ptr<FILE, decltype(&_pclose)> pipe(_popen(cmd, "r"), _pclose);
 		if (!pipe) {
-			throw std::runtime_error("popen() failed!");
+			throw std::runtime_error(XorStr("popen() failed!"));
 		}
 
 		while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
@@ -1193,20 +1198,20 @@ void modify()
 	{
 		if ( check_section_integrity( XorStr( ".text" ).c_str( ), false ) )
 		{
-			abort( );
+			LI_FN(abort)( );
 		}
 		if(!LockMemAccess())
 		{
-			abort( );
+			LI_FN(abort)( );
 		}
 		if (Function_Address == NULL) {
-			Function_Address = FindPattern(PBYTE("\x48\x89\x74\x24\x00\x57\x48\x81\xec\x00\x00\x00\x00\x49\x8b\xf0"), "xxxx?xxxx????xxx") - 0x5;
+			Function_Address = FindPattern(PBYTE(XorStr("\x48\x89\x74\x24\x00\x57\x48\x81\xec\x00\x00\x00\x00\x49\x8b\xf0").c_str()), XorStr("xxxx?xxxx????xxx").c_str()) - 0x5;
 		}
 		BYTE Instruction = *(BYTE*)Function_Address;
 
 		if ((DWORD64)Instruction == 0xE9) {
-			abort();
+			LI_FN(abort)();
 		}
-		Sleep(50);
+		LI_FN(Sleep)(50);
 	}
 }

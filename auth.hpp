@@ -25,7 +25,7 @@ namespace KeyAuth {
 		void log(std::string msg);
 		void license(std::string key);
 		std::string var(std::string varid);
-		std::string webhook(std::string id, std::string params);
+		std::string webhook(std::string id, std::string params, std::string body, std::string contenttype);
 		void setvar(std::string var, std::string vardata);
 		std::string getvar(std::string var);
 		bool checkblack();
