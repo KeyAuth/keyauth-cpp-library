@@ -191,6 +191,9 @@
     <ClInclude Include="sha256.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Security.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="curl\libcurl.lib">
