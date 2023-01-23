@@ -58,6 +58,7 @@ static std::string hexDecode(const std::string& hex);
 std::string get_str_between_two_str(const std::string& s, const std::string& start_delim, const std::string& stop_delim);
 std::string checksum();
 void modify();
+void error(std::string message);
 std::string signature;
 
 void KeyAuth::api::init()
@@ -116,7 +117,7 @@ void KeyAuth::api::init()
 		ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
 	}
 	if (ss_result.str().c_str() != signature) { // check response authenticity, if not authentic program crashes
-		abort();
+		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
 	}
 
 	load_response_data(json);
@@ -189,7 +190,7 @@ void KeyAuth::api::login(std::string username, std::string password)
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		LI_FN(abort)();
+		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
 	}
 
 	load_response_data(json);
@@ -390,7 +391,7 @@ void KeyAuth::api::web_login()
 		}
 
 		if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-			LI_FN(abort)();
+			error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
 		}
 
 		// Respond to the request.
@@ -620,7 +621,7 @@ void KeyAuth::api::regstr(std::string username, std::string password, std::strin
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		LI_FN(abort)();
+		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
 	}
 
 	load_response_data(json);
@@ -655,7 +656,7 @@ void KeyAuth::api::upgrade(std::string username, std::string key) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		LI_FN(abort)();
+		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
 	}
 
 	json[(XorStr("success"))] = false;
@@ -690,7 +691,7 @@ void KeyAuth::api::license(std::string key) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		LI_FN(abort)();
+		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
 	}
 
 	load_response_data(json);
@@ -738,7 +739,7 @@ std::string KeyAuth::api::getvar(std::string var) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		LI_FN(abort)();
+		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
 	}
 
 	load_response_data(json);
@@ -772,7 +773,7 @@ void KeyAuth::api::ban(std::string reason) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		LI_FN(abort)();
+		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
 	}
 
 	load_response_data(json);
@@ -805,7 +806,7 @@ bool KeyAuth::api::checkblack() {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		LI_FN(abort)();
+		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
 	}
 
 	if (json[(XorStr("success"))])
@@ -844,7 +845,7 @@ void KeyAuth::api::check() {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		abort();
+		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
 	}
 
 	load_response_data(json);
@@ -876,7 +877,7 @@ std::string KeyAuth::api::var(std::string varid) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		LI_FN(abort)();
+		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
 	}
 
 	load_response_data(json);
@@ -933,7 +934,7 @@ std::vector<unsigned char> KeyAuth::api::download(std::string fileid) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		LI_FN(abort)();
+		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
 	}
 
 	load_response_data(json);
@@ -948,16 +949,17 @@ std::vector<unsigned char> KeyAuth::api::download(std::string fileid) {
 
 std::string KeyAuth::api::webhook(std::string id, std::string params, std::string body, std::string contenttype)
 {
+	CURL *curl = curl_easy_init();
 	auto data =
 		XorStr("type=webhook") +
 		XorStr("&webid=") + id +
-		XorStr("&params=") + params +
+		XorStr("&params=") + curl_easy_escape(curl, params.c_str(), 0) +
 		XorStr("&body=") + body + 
 		XorStr("&conttype=") + contenttype +
 		XorStr("&sessionid=") + sessionid +
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
-
+	curl_easy_cleanup(curl);
 	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
 
@@ -977,7 +979,7 @@ std::string KeyAuth::api::webhook(std::string id, std::string params, std::strin
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		LI_FN(abort)();
+		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
 	}
 
 	load_response_data(json);
@@ -987,7 +989,7 @@ std::string KeyAuth::api::webhook(std::string id, std::string params, std::strin
 	}
 	return "";
 }
-
+// credits https://stackoverflow.com/a/3790661
 static std::string hexDecode(const std::string& hex)
 {
 	int len = hex.length();
@@ -1000,7 +1002,7 @@ static std::string hexDecode(const std::string& hex)
 	}
 	return newString;
 }
-
+// credits https://stackoverflow.com/a/43002794
 std::string get_str_between_two_str(const std::string& s,
 	const std::string& start_delim,
 	const std::string& stop_delim)
@@ -1040,17 +1042,23 @@ std::string KeyAuth::api::req(std::string data, std::string url) {
 	auto code = curl_easy_perform(curl);
 
 	if (code != CURLE_OK)
-		MessageBoxA(0, curl_easy_strerror(code), 0, MB_ICONERROR);
+		error(curl_easy_strerror(code));
 
 	return to_return;
 }
-
+void error(std::string message) {
+	system(("start cmd /C \"color b && title Error && echo " + message + " && timeout /t 5\"").c_str());
+	__fastfail(0);
+}
+// code submitted in pull request from https://github.com/Roblox932
 auto check_section_integrity( const char *section_name, bool fix = false ) -> bool
 {
 	const auto map_file = []( HMODULE hmodule ) -> std::tuple<std::uintptr_t, HANDLE>
 	{
 		wchar_t filename[ MAX_PATH ];
-		GetModuleFileName( hmodule, filename, MAX_PATH );
+		DWORD size = MAX_PATH;
+		QueryFullProcessImageName(GetCurrentProcess(), 0, filename, &size);
+
 
 		const auto file_handle = CreateFile( filename, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0 );
 		if ( !file_handle || file_handle == INVALID_HANDLE_VALUE )
@@ -1163,7 +1171,7 @@ std::string checksum()
 
 	return exec(("certutil -hashfile \"" + std::string(rawPathName) + XorStr( "\" MD5 | find /i /v \"md5\" | find /i /v \"certutil\"") ).c_str());
 }
-
+// code submitted in pull request from https://github.com/BINM7MD
 BOOL bDataCompare(const BYTE* pData, const BYTE* bMask, const char* szMask)
 {
 	for (; *szMask; ++szMask, ++pData, ++bMask)
@@ -1192,25 +1200,28 @@ DWORD64 FindPattern(BYTE* bMask, const char* szMask)
 DWORD64 Function_Address;
 void modify()
 {
+	// code submitted in pull request from https://github.com/Roblox932
 	check_section_integrity( XorStr( ".text" ).c_str( ), true );
 
 	while (true)
 	{
 		if ( check_section_integrity( XorStr( ".text" ).c_str( ), false ) )
 		{
-			LI_FN(abort)( );
+			error("check_section_integrity() failed, don't tamper with the program.");
 		}
+		// code submitted in pull request from https://github.com/sbtoonz, authored by KeePassXC https://github.com/keepassxreboot/keepassxc/blob/dab7047113c4ad4ffead944d5c4ebfb648c1d0b0/src/core/Bootstrap.cpp#L121
 		if(!LockMemAccess())
 		{
-			LI_FN(abort)( );
+			error("LockMemAccess() failed, don't tamper with the program.");
 		}
+		// code submitted in pull request from https://github.com/BINM7MD
 		if (Function_Address == NULL) {
-			Function_Address = FindPattern(PBYTE(XorStr("\x48\x89\x74\x24\x00\x57\x48\x81\xec\x00\x00\x00\x00\x49\x8b\xf0").c_str()), XorStr("xxxx?xxxx????xxx").c_str()) - 0x5;
+			Function_Address = FindPattern(PBYTE("\x48\x89\x74\x24\x00\x57\x48\x81\xec\x00\x00\x00\x00\x49\x8b\xf0"), XorStr("xxxx?xxxx????xxx").c_str()) - 0x5;
 		}
 		BYTE Instruction = *(BYTE*)Function_Address;
 
 		if ((DWORD64)Instruction == 0xE9) {
-			LI_FN(abort)();
+			error("Pattern checksum failed, don't tamper with the program.");
 		}
 		LI_FN(Sleep)(50);
 	}
