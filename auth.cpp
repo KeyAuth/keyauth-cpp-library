@@ -196,6 +196,43 @@ void KeyAuth::api::login(std::string username, std::string password)
 		load_user_data(json[("info")]);
 }
 
+void KeyAuth::api::chatget(std::string channel)
+{
+	auto data =
+		XorStr("type=chatget") +
+		XorStr("&channel=") + channel +
+		XorStr("&sessionid=") + sessionid +
+		XorStr("&name=") + name +
+		XorStr("&ownerid=") + ownerid;
+
+	auto response = req(data, url);
+	auto json = response_decoder.parse(response);
+	load_channel_data(json);
+}
+
+bool KeyAuth::api::chatsend(std::string message, std::string channel)
+{
+	auto data =
+		XorStr("type=chatsend") +
+		XorStr("&message=") + message +
+		XorStr("&channel=") + channel +
+		XorStr("&sessionid=") + sessionid +
+		XorStr("&name=") + name +
+		XorStr("&ownerid=") + ownerid;
+
+	auto response = req(data, url);
+	auto json = response_decoder.parse(response);
+	load_response_data(json);
+	if (json[("success")])
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 void KeyAuth::api::web_login()
 {
 

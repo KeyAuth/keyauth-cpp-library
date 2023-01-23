@@ -4,6 +4,13 @@
 
 #define CURL_STATICLIB 
 
+struct channel_struct
+{
+	std::string author;
+	std::string message;
+	std::string timestamp;
+};
+
 namespace KeyAuth {
 	class api {
 	public:
@@ -28,6 +35,8 @@ namespace KeyAuth {
 		void login(std::string username, std::string password);
 		std::vector<unsigned char> download(std::string fileid);
 		void regstr(std::string username, std::string password, std::string key);
+		void chatget(std::string channel);
+		bool chatsend(std::string message, std::string channel);
 
 		class data_class {
 		public:
@@ -46,6 +55,7 @@ namespace KeyAuth {
 			std::vector<std::string> subscriptions;
 			std::string expiry;
 			// response data
+			std::vector<channel_struct> channeldata;
 			bool success;
 			std::string message;
 		};
@@ -81,6 +91,22 @@ namespace KeyAuth {
 		void load_response_data(nlohmann::json data) {
 			api::data.success = data["success"];
 			api::data.message = data["message"];
+		}
+
+		void load_channel_data(nlohmann::json data) {
+			api::data.success = data["success"];
+			api::data.message = data["message"];
+			for (auto sub : data["messages"])
+			{
+				std::string authoroutput = sub[("author")];
+				std::string messageoutput = sub[("message")];
+				std::string timestampoutput = sub[("timestamp")];
+				authoroutput.erase(remove(authoroutput.begin(), authoroutput.end(), '"'), authoroutput.end());
+				messageoutput.erase(remove(messageoutput.begin(), messageoutput.end(), '"'), messageoutput.end());
+				timestampoutput.erase(remove(timestampoutput.begin(), timestampoutput.end(), '"'), timestampoutput.end());
+				channel_struct output = { authoroutput , messageoutput, timestampoutput };
+				api::data.channeldata.push_back(output);
+			}
 		}
 
 		nlohmann::json response_decoder;
