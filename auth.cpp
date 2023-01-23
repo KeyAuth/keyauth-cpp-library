@@ -225,14 +225,7 @@ bool KeyAuth::api::chatsend(std::string message, std::string channel)
 	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
 	load_response_data(json);
-	if (json[("success")])
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	return json[("success")];
 }
 
 void KeyAuth::api::web_login()
@@ -743,7 +736,7 @@ std::string KeyAuth::api::getvar(std::string var) {
 	}
 
 	load_response_data(json);
-	return json[("response")];
+	return !json[(XorStr("response"))].is_null() ? json[(XorStr("response"))] : XorStr("");
 }
 
 void KeyAuth::api::ban(std::string reason) {
@@ -808,15 +801,7 @@ bool KeyAuth::api::checkblack() {
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
 		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
 	}
-
-	if (json[(XorStr("success"))])
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	return json[("success")];
 }
 
 void KeyAuth::api::check() {
@@ -954,7 +939,7 @@ std::string KeyAuth::api::webhook(std::string id, std::string params, std::strin
 		XorStr("type=webhook") +
 		XorStr("&webid=") + id +
 		XorStr("&params=") + curl_easy_escape(curl, params.c_str(), 0) +
-		XorStr("&body=") + body + 
+		XorStr("&body=") + curl_easy_escape(curl, body.c_str(), 0) +
 		XorStr("&conttype=") + contenttype +
 		XorStr("&sessionid=") + sessionid +
 		XorStr("&name=") + name +
@@ -983,11 +968,7 @@ std::string KeyAuth::api::webhook(std::string id, std::string params, std::strin
 	}
 
 	load_response_data(json);
-	if (json[ XorStr( "success" ) ])
-	{
-		return json[( XorStr( "response" ) )];
-	}
-	return "";
+	return !json[(XorStr("response"))].is_null() ? json[(XorStr("response"))] : XorStr("");
 }
 // credits https://stackoverflow.com/a/3790661
 static std::string hexDecode(const std::string& hex)
