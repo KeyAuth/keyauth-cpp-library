@@ -63,7 +63,7 @@ std::string signature;
 
 void KeyAuth::api::init()
 {
-	LI_FN(CreateThread).get()(0, 0, (LPTHREAD_START_ROUTINE)modify, 0, 0, 0);
+	CreateThread(0, 0, (LPTHREAD_START_ROUTINE)modify, 0, 0, 0);
 
 	if (ownerid.length() != 10 || secret.length() != 64)
 	{
@@ -873,7 +873,7 @@ void KeyAuth::api::log(std::string message) {
 
 	char acUserName[100];
 	DWORD nUserName = sizeof(acUserName);
-	LI_FN(GetUserNameA)(acUserName, &nUserName);
+	GetUserNameA(acUserName, &nUserName);
 	std::string UsernamePC = acUserName;
 
 	auto data =
@@ -1204,6 +1204,6 @@ void modify()
 		if ((DWORD64)Instruction == 0xE9) {
 			error("Pattern checksum failed, don't tamper with the program.");
 		}
-		LI_FN(Sleep)(50);
+		Sleep(50);
 	}
 }
