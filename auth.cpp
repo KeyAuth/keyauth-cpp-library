@@ -67,18 +67,18 @@ void KeyAuth::api::init()
 
 	if (ownerid.length() != 10 || secret.length() != 64)
 	{
-		LI_FN(MessageBoxA).get()(0, XorStr("Application Not Setup Correctly. Please Watch Video Linked in main.cpp").c_str(), NULL, MB_ICONERROR);
+		MessageBoxA)(0, XorStr("Application Not Setup Correctly. Please Watch Video Linked in main.cpp").c_str(), NULL, MB_ICONERROR);
 		exit(0);
 	}
 
 	UUID uuid = { 0 };
 	std::string guid;
-	LI_FN(UuidCreate).get()(&uuid);
+	::UuidCreate(&uuid);
 	RPC_CSTR szUuid = NULL;
-	if (LI_FN(UuidToStringA).get()(&uuid, &szUuid) == RPC_S_OK)
+	if UuidToStringA(&uuid, &szUuid) == RPC_S_OK)
 	{
 		guid = (char*)szUuid;
-		LI_FN(RpcStringFreeA).get()(&szUuid);
+		RpcStringFreeA(&szUuid);
 	}
 	std::string sentKey;
 	sentKey = guid.substr(0, 16);
@@ -96,8 +96,8 @@ void KeyAuth::api::init()
 	auto response = req(data, url);
 
 	if (response == XorStr("KeyAuth_Invalid")) {
-		LI_FN(MessageBoxA).get()(0, XorStr("Application not found. Please copy strings directly from dashboard.").c_str(), NULL, MB_ICONERROR);
-		LI_FN(exit)(0);
+		MessageBoxA(0, XorStr("Application not found. Please copy strings directly from dashboard.").c_str(), NULL, MB_ICONERROR);
+		exit(0);
 	}
 
 	auto json = response_decoder.parse(response);
@@ -132,13 +132,13 @@ void KeyAuth::api::init()
 		std::string dl = json[(XorStr("download"))];
 		if (dl == "")
 		{
-			LI_FN(MessageBoxA).get()(0, XorStr("Version in the loader does match the one on the dashboard, and the download link on dashboard is blank.\n\nTo fix this, either fix the loader so it matches the version on the dashboard. Or if you intended for it to have different versions, update the download link on dashboard so it will auto-update correctly.").c_str(), NULL, MB_ICONERROR);
+			MessageBoxA)(0, XorStr("Version in the loader does match the one on the dashboard, and the download link on dashboard is blank.\n\nTo fix this, either fix the loader so it matches the version on the dashboard. Or if you intended for it to have different versions, update the download link on dashboard so it will auto-update correctly.").c_str(), NULL, MB_ICONERROR);
 		}
 		else
 		{
-			LI_FN(ShellExecuteA).get()(0, XorStr("open").c_str(), dl.c_str(), 0, 0, SW_SHOWNORMAL);
+			ShellExecuteA(0, XorStr("open").c_str(), dl.c_str(), 0, 0, SW_SHOWNORMAL);
 		}
-		LI_FN(exit)(0);
+		exit(0);
 	}
 }
 
