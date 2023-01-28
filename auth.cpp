@@ -22,7 +22,6 @@
 #include <sstream> 
 #include <iomanip> 
 #include <xorstr.hpp>
-#include <lazy importer.hpp>
 #include <fstream> 
 #include <http.h>
 #include <stdlib.h>
@@ -67,7 +66,7 @@ void KeyAuth::api::init()
 
 	if (ownerid.length() != 10 || secret.length() != 64)
 	{
-		MessageBoxA)(0, XorStr("Application Not Setup Correctly. Please Watch Video Linked in main.cpp").c_str(), NULL, MB_ICONERROR);
+		MessageBoxA(0, XorStr("Application Not Setup Correctly. Please Watch Video Linked in main.cpp").c_str(), NULL, MB_ICONERROR);
 		exit(0);
 	}
 
@@ -75,10 +74,10 @@ void KeyAuth::api::init()
 	std::string guid;
 	::UuidCreate(&uuid);
 	RPC_CSTR szUuid = NULL;
-	if UuidToStringA(&uuid, &szUuid) == RPC_S_OK)
+	if (::UuidToStringA(&uuid, &szUuid) == RPC_S_OK)
 	{
 		guid = (char*)szUuid;
-		RpcStringFreeA(&szUuid);
+		::RpcStringFreeA(&szUuid);
 	}
 	std::string sentKey;
 	sentKey = guid.substr(0, 16);
@@ -132,7 +131,7 @@ void KeyAuth::api::init()
 		std::string dl = json[(XorStr("download"))];
 		if (dl == "")
 		{
-			MessageBoxA)(0, XorStr("Version in the loader does match the one on the dashboard, and the download link on dashboard is blank.\n\nTo fix this, either fix the loader so it matches the version on the dashboard. Or if you intended for it to have different versions, update the download link on dashboard so it will auto-update correctly.").c_str(), NULL, MB_ICONERROR);
+			MessageBoxA(0, XorStr("Version in the loader does match the one on the dashboard, and the download link on dashboard is blank.\n\nTo fix this, either fix the loader so it matches the version on the dashboard. Or if you intended for it to have different versions, update the download link on dashboard so it will auto-update correctly.").c_str(), NULL, MB_ICONERROR);
 		}
 		else
 		{
