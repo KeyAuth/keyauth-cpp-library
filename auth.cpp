@@ -227,6 +227,41 @@ bool KeyAuth::api::chatsend(std::string message, std::string channel)
 	return json[("success")];
 }
 
+void KeyAuth::api::changeusername(std::string newusername)
+{
+	auto data =
+		XorStr("type=changeUsername") +
+		XorStr("&newUsername=") + newusername +
+		XorStr("&sessionid=") + sessionid +
+		XorStr("&name=") + name +
+		XorStr("&ownerid=") + ownerid;
+
+	auto response = req(data, url);
+	auto json = response_decoder.parse(response);
+
+	// from https://github.com/h5p9sl/hmac_sha256
+	std::stringstream ss_result;
+
+	// Allocate memory for the HMAC
+	std::vector<uint8_t> out(SHA256_HASH_SIZE);
+
+	// Call hmac-sha256 function
+	hmac_sha256(enckey.data(), enckey.size(), response.data(), response.size(),
+		out.data(), out.size());
+
+	// Convert `out` to string with std::hex
+	for (uint8_t x : out) {
+		ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+	}
+
+	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
+		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
+	}
+
+	load_response_data(json);
+
+}
+
 void KeyAuth::api::web_login()
 {
 
