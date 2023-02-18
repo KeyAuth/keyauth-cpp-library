@@ -39,6 +39,12 @@ namespace KeyAuth {
 		bool chatsend(std::string message, std::string channel);
 		void changeusername(std::string newusername);
 
+		class subscriptions_class {
+		public:
+			std::string name;
+			std::string expiry;
+		};
+
 		class data_class {
 		public:
 			// app data
@@ -53,8 +59,9 @@ namespace KeyAuth {
 			std::string hwid;
 			std::string createdate;
 			std::string lastlogin;
-			std::vector<std::string> subscriptions;
-			std::string expiry;
+
+			std::vector<subscriptions_class> subscriptions;
+
 			// response data
 			std::vector<channel_struct> channeldata;
 			bool success;
@@ -77,8 +84,13 @@ namespace KeyAuth {
 			}
 			api::data.createdate = data["createdate"];
 			api::data.lastlogin = data["lastlogin"];
-			for (auto sub : data["subscriptions"]) api::data.subscriptions.push_back(sub["subscription"]);
-			api::data.expiry = data["subscriptions"][0]["expiry"];
+
+			for (int i = 0; i < data["subscriptions"]; i++) { // Prompto#7895 was here
+				subscriptions_class subscriptions;
+				subscriptions.name = data["subscriptions"][i]["subscription"];
+				subscriptions.expiry = data["subscriptions"][i]["expiry"];
+				api::data.subscriptions.emplace_back(subscriptions);
+			}
 		}
 
 		void load_app_data(nlohmann::json data) {
