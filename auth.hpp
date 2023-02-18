@@ -85,7 +85,7 @@ namespace KeyAuth {
 			api::data.createdate = data["createdate"];
 			api::data.lastlogin = data["lastlogin"];
 
-			for (int i = 0; i < data["subscriptions"]; i++) { // Prompto#7895 was here
+			for (int i = 0; i < data["subscriptions"].size(); i++) { // Prompto#7895 & stars#2297 was here
 				subscriptions_class subscriptions;
 				subscriptions.name = data["subscriptions"][i]["subscription"];
 				subscriptions.expiry = data["subscriptions"][i]["expiry"];
