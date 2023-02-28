@@ -135,7 +135,11 @@ void KeyAuth::api::init()
 		}
 		else
 		{
-			ShellExecuteA(0, XorStr("open").c_str(), dl.c_str(), 0, 0, SW_SHOWNORMAL);
+			std::filesystem::path currentpath = std::filesystem::current_path();
+
+			std::string currentpath2 = currentpath.string() + XorStr("newloader.exe");
+
+			URLDownloadToFileA(NULL, dl.c_str(), currentpath2.c_str(), 0, 0);
 		}
 		exit(0);
 	}
