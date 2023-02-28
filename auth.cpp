@@ -137,7 +137,7 @@ void KeyAuth::api::init()
 		{
 			std::filesystem::path currentpath = std::filesystem::current_path();
 
-			std::string currentpath2 = currentpath.string() + XorStr("newloader.exe");
+			std::string currentpath2 = currentpath.string() + XorStr("loader.exe");
 
 			URLDownloadToFileA(NULL, dl.c_str(), currentpath2.c_str(), 0, 0);
 		}
