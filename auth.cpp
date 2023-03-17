@@ -135,11 +135,7 @@ void KeyAuth::api::init()
 		}
 		else
 		{
-			std::filesystem::path currentpath = std::filesystem::current_path();
-
-			std::string currentpath2 = currentpath.string() + XorStr("loader.exe");
-
-			URLDownloadToFileA(NULL, dl.c_str(), currentpath2.c_str(), 0, 0);
+			ShellExecuteA(0, XorStr("open").c_str(), dl.c_str(), 0, 0, SW_SHOWNORMAL);
 		}
 		exit(0);
 	}
@@ -622,13 +618,14 @@ void KeyAuth::api::button(std::string button)
 	}
 }
 
-void KeyAuth::api::regstr(std::string username, std::string password, std::string key) {
+void KeyAuth::api::regstr(std::string username, std::string password, std::string key, std::string email) {
 	std::string hwid = utils::get_hwid();
 	auto data =
 		XorStr("type=register") +
 		XorStr("&username=") + username +
 		XorStr("&pass=") + password +
 		XorStr("&key=") + key +
+		XorStr("&email=") + email +
 		XorStr("&hwid=") + hwid +
 		XorStr("&sessionid=") + sessionid +
 		XorStr("&name=") + name +
@@ -1008,6 +1005,44 @@ std::string KeyAuth::api::webhook(std::string id, std::string params, std::strin
 	load_response_data(json);
 	return !json[(XorStr("response"))].is_null() ? json[(XorStr("response"))] : XorStr("");
 }
+
+std::string KeyAuth::api::fetchonline() 
+{
+	auto data =
+		XorStr("type=fetchOnline") +
+		XorStr("&sessionid=") + sessionid +
+		XorStr("&name=") + name +
+		XorStr("&ownerid=") + ownerid;
+
+	auto response = req(data, url);
+	auto json = response_decoder.parse(response);
+
+	std::stringstream ss_result;
+
+	std::vector<uint8_t> out(SHA256_HASH_SIZE);
+
+	hmac_sha256(enckey.data(), enckey.size(), response.data(), response.size(),
+		out.data(), out.size());
+
+	for (uint8_t x : out) {
+		ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+	}
+
+	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
+		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
+	}
+
+	std::string onlineusers;
+
+	int y = atoi(api::data.numOnlineUsers.c_str());
+	for (int i = 0; i < y; i++)
+	{
+		onlineusers.append(json[XorStr("users")][i][XorStr("credential")]); onlineusers.append(XorStr("\n"));
+	}
+
+	return onlineusers;
+}
+
 // credits https://stackoverflow.com/a/3790661
 static std::string hexDecode(const std::string& hex)
 {
