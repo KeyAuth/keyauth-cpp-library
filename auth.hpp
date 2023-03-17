@@ -34,10 +34,11 @@ namespace KeyAuth {
 		void upgrade(std::string username, std::string key);
 		void login(std::string username, std::string password);
 		std::vector<unsigned char> download(std::string fileid);
-		void regstr(std::string username, std::string password, std::string key);
+		void regstr(std::string username, std::string password, std::string key, std::string email = "");
 		void chatget(std::string channel);
 		bool chatsend(std::string message, std::string channel);
 		void changeusername(std::string newusername);
+		std::string fetchonline();
 
 		class subscriptions_class {
 		public:
@@ -64,7 +65,7 @@ namespace KeyAuth {
 
 			// response data
 			std::vector<channel_struct> channeldata;
-			bool success;
+			bool success{};
 			std::string message;
 		};
 		data_class data;
