@@ -100,6 +100,7 @@ void KeyAuth::api::init()
 	}
 
 	auto json = response_decoder.parse(response);
+	std::string message = json[(XorStr("message"))];
 
 	// from https://github.com/h5p9sl/hmac_sha256
 	std::stringstream ss_result;
@@ -116,7 +117,7 @@ void KeyAuth::api::init()
 		ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
 	}
 	if (ss_result.str().c_str() != signature) { // check response authenticity, if not authentic program crashes
-		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
+		error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
 	}
 
 	load_response_data(json);
@@ -172,6 +173,7 @@ void KeyAuth::api::login(std::string username, std::string password)
 		XorStr("&ownerid=") + ownerid;
 	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
+	std::string message = json[(XorStr("message"))];
 
 	// from https://github.com/h5p9sl/hmac_sha256
 	std::stringstream ss_result;
@@ -189,7 +191,7 @@ void KeyAuth::api::login(std::string username, std::string password)
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
+		error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
 	}
 
 	load_response_data(json);
@@ -238,6 +240,7 @@ void KeyAuth::api::changeusername(std::string newusername)
 
 	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
+	std::string message = json[(XorStr("message"))];
 
 	// from https://github.com/h5p9sl/hmac_sha256
 	std::stringstream ss_result;
@@ -255,7 +258,7 @@ void KeyAuth::api::changeusername(std::string newusername)
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
+		error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
 	}
 
 	load_response_data(json);
@@ -401,6 +404,7 @@ void KeyAuth::api::web_login()
 			XorStr("&ownerid=") + ownerid;
 		auto resp = req(data, api::url);
 		auto json = response_decoder.parse(resp);
+		std::string message = json[(XorStr("message"))];
 
 		// from https://github.com/h5p9sl/hmac_sha256
 		std::stringstream ss_result;
@@ -418,7 +422,7 @@ void KeyAuth::api::web_login()
 		}
 
 		if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-			error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
+			error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
 		}
 
 		// Respond to the request.
@@ -632,6 +636,7 @@ void KeyAuth::api::regstr(std::string username, std::string password, std::strin
 		XorStr("&ownerid=") + ownerid;
 	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
+	std::string message = json[(XorStr("message"))];
 
 	// from https://github.com/h5p9sl/hmac_sha256
 	std::stringstream ss_result;
@@ -649,7 +654,7 @@ void KeyAuth::api::regstr(std::string username, std::string password, std::strin
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
+		error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
 	}
 
 	load_response_data(json);
@@ -667,6 +672,7 @@ void KeyAuth::api::upgrade(std::string username, std::string key) {
 		XorStr("&ownerid=") + ownerid;
 	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
+	std::string message = json[(XorStr("message"))];
 
 	// from https://github.com/h5p9sl/hmac_sha256
 	std::stringstream ss_result;
@@ -684,7 +690,7 @@ void KeyAuth::api::upgrade(std::string username, std::string key) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
+		error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
 	}
 
 	json[(XorStr("success"))] = false;
@@ -702,6 +708,7 @@ void KeyAuth::api::license(std::string key) {
 		XorStr("&ownerid=") + ownerid;
 	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
+	std::string message = json[(XorStr("message"))];
 
 	// from https://github.com/h5p9sl/hmac_sha256
 	std::stringstream ss_result;
@@ -719,7 +726,7 @@ void KeyAuth::api::license(std::string key) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
+		error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
 	}
 
 	load_response_data(json);
@@ -750,6 +757,7 @@ std::string KeyAuth::api::getvar(std::string var) {
 		XorStr("&ownerid=") + ownerid;
 	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
+	std::string message = json[(XorStr("message"))];
 
 	// from https://github.com/h5p9sl/hmac_sha256
 	std::stringstream ss_result;
@@ -767,7 +775,7 @@ std::string KeyAuth::api::getvar(std::string var) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
+		error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
 	}
 
 	load_response_data(json);
@@ -784,6 +792,7 @@ void KeyAuth::api::ban(std::string reason) {
 		XorStr("&ownerid=") + ownerid;
 	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
+	std::string message = json[(XorStr("message"))];
 
 	// from https://github.com/h5p9sl/hmac_sha256
 	std::stringstream ss_result;
@@ -801,7 +810,7 @@ void KeyAuth::api::ban(std::string reason) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
+		error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
 	}
 
 	load_response_data(json);
@@ -817,6 +826,7 @@ bool KeyAuth::api::checkblack() {
 		XorStr("&ownerid=") + ownerid;
 	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
+	std::string message = json[(XorStr("message"))];
 
 	// from https://github.com/h5p9sl/hmac_sha256
 	std::stringstream ss_result;
@@ -834,7 +844,7 @@ bool KeyAuth::api::checkblack() {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
+		error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
 	}
 	return json[("success")];
 }
@@ -848,6 +858,7 @@ void KeyAuth::api::check() {
 
 	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
+	std::string message = json[(XorStr("message"))];
 
 	// from https://github.com/h5p9sl/hmac_sha256
 	std::stringstream ss_result;
@@ -865,7 +876,7 @@ void KeyAuth::api::check() {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
+		error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
 	}
 
 	load_response_data(json);
@@ -880,6 +891,7 @@ std::string KeyAuth::api::var(std::string varid) {
 		XorStr("&ownerid=") + ownerid;
 	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
+	std::string message = json[(XorStr("message"))];
 
 	// from https://github.com/h5p9sl/hmac_sha256
 	std::stringstream ss_result;
@@ -897,7 +909,7 @@ std::string KeyAuth::api::var(std::string varid) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
+		error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
 	}
 
 	load_response_data(json);
@@ -937,6 +949,7 @@ std::vector<unsigned char> KeyAuth::api::download(std::string fileid) {
 
 	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
+	std::string message = json[(XorStr("message"))];
 
 	// from https://github.com/h5p9sl/hmac_sha256
 	std::stringstream ss_result;
@@ -954,7 +967,7 @@ std::vector<unsigned char> KeyAuth::api::download(std::string fileid) {
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
+		error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
 	}
 
 	load_response_data(json);
@@ -982,6 +995,7 @@ std::string KeyAuth::api::webhook(std::string id, std::string params, std::strin
 	curl_easy_cleanup(curl);
 	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
+	std::string message = json[(XorStr("message"))];
 
 	// from https://github.com/h5p9sl/hmac_sha256
 	std::stringstream ss_result;
@@ -999,7 +1013,7 @@ std::string KeyAuth::api::webhook(std::string id, std::string params, std::strin
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
+		error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
 	}
 
 	load_response_data(json);
@@ -1016,6 +1030,7 @@ std::string KeyAuth::api::fetchonline()
 
 	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
+	std::string message = json[(XorStr("message"))];
 
 	std::stringstream ss_result;
 
@@ -1029,7 +1044,7 @@ std::string KeyAuth::api::fetchonline()
 	}
 
 	if (ss_result.str() != signature) { // check response authenticity, if not authentic program crashes
-		error("Signature checksum failed. The request was either tampered with, or your session ended and you need to run the program again.");
+		error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
 	}
 
 	std::string onlineusers;
