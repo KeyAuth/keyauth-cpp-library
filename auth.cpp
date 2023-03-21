@@ -37,6 +37,7 @@
 #include <stdexcept>
 #include <string>
 #include <array>
+#include <chrono>
 
 #include <functional>
 #include <vector>
@@ -1085,6 +1086,7 @@ std::string get_str_between_two_str(const std::string& s,
 }
 
 std::string KeyAuth::api::req(std::string data, std::string url) {
+	auto timestart = std::chrono::high_resolution_clock::now();
 	CURL* curl = curl_easy_init();
 	if (!curl)
 		return XorStr("null");
@@ -1113,6 +1115,8 @@ std::string KeyAuth::api::req(std::string data, std::string url) {
 	if (code != CURLE_OK)
 		error(curl_easy_strerror(code));
 
+	auto timeend = std::chrono::high_resolution_clock::now();
+	KeyAuth::api::data.responsetime = std::chrono::duration_cast<std::chrono::milliseconds>(timestart - timeend).count();
 	return to_return;
 }
 void error(std::string message) {
