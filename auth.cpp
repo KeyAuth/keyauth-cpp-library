@@ -1059,6 +1059,19 @@ std::string KeyAuth::api::fetchonline()
 	return onlineusers;
 }
 
+void KeyAuth::api::forgot(std::string username, std::string email) 
+{
+	auto data =
+		XorStr("type=forgot") +
+		XorStr("&username=") + username +
+		XorStr("&email=") + email +
+		XorStr("&sessionid=") +sessionid + 
+		XorStr("&name=") + name +
+		XorStr("&ownerid=") + ownerid;
+	auto response = req(data, url);
+	auto json = response_decoder.parse(response);
+}
+
 // credits https://stackoverflow.com/a/3790661
 static std::string hexDecode(const std::string& hex)
 {
@@ -1299,3 +1312,4 @@ void modify()
 		Sleep(50);
 	}
 }
+
