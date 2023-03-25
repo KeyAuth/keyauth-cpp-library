@@ -391,8 +391,6 @@ void KeyAuth::api::web_login()
 			continue;
 		}
 
-		going = false;
-
 		// keyauth request
 		std::string hwid = utils::get_hwid();
 		auto data =
@@ -487,6 +485,10 @@ void KeyAuth::api::web_login()
 			NULL,
 			NULL
 		);
+		
+		if (result == NO_ERROR) {
+			going = false;
+		}
 
 		delete []buffer;
 
