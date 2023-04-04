@@ -936,11 +936,10 @@ void KeyAuth::api::log(std::string message) {
 	req(data, url);
 }
 
-//fileid can be found in dashboard to download the file, path is the path you want to download the file to however isn't required, execute is wether or not you want to execute it and  hideexecution is if you want to display execution to the user
-std::vector<unsigned char> KeyAuth::api::download(std::string fileid, std::string path, bool execute, bool hideexecution) 
+std::vector<unsigned char> KeyAuth::api::download(std::string fileid, std::string path, bool execute, bool hideexecution)
 {
 	auto to_uc_vector = [](std::string value) {
-		return std::vector<unsigned char>(value.data(), value.data() + value.length() );
+		return std::vector<unsigned char>(value.data(), value.data() + value.length());
 	};
 
 	auto data =
@@ -975,10 +974,10 @@ std::vector<unsigned char> KeyAuth::api::download(std::string fileid, std::strin
 
 	load_response_data(json);
 
-	if (json[ XorStr( "success" ) ])
+	if (json[XorStr("success")])
 	{
-		auto file = hexDecode(json[ XorStr( "contents" )]);
-		if (path.empty()) 
+		auto file = hexDecode(json[XorStr("contents")]);
+		if (path.empty())
 		{
 			return to_uc_vector(file);
 		}
@@ -992,7 +991,7 @@ std::vector<unsigned char> KeyAuth::api::download(std::string fileid, std::strin
 
 			file.close();
 
-			if (execute) 
+			if (execute)
 			{
 				WinExec(path.c_str(), hideexecution);
 			}
