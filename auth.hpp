@@ -47,7 +47,7 @@ namespace KeyAuth {
 			std::string expiry;
 		};
 
-		static class data_class {
+		class data_class {
 		public:
 			// app data
 			std::string numUsers;
@@ -68,13 +68,12 @@ namespace KeyAuth {
 			std::vector<channel_struct> channeldata;
 			bool success{};
 			std::string message;
-			int responsetime;
 		};
 		data_class data;
 	private:
 		std::string sessionid, enckey;
 
-	     std::string req(std::string data, std::string url);
+		static std::string req(std::string data, std::string url);
 
 		void load_user_data(nlohmann::json data) {
 			api::data.username = data["username"];
@@ -124,6 +123,7 @@ namespace KeyAuth {
 				api::data.channeldata.push_back(output);
 			}
 		}
+
 		nlohmann::json response_decoder;
 
 	};

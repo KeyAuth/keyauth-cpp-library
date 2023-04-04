@@ -37,7 +37,6 @@
 #include <stdexcept>
 #include <string>
 #include <array>
-#include <chrono>
 
 #include <functional>
 #include <vector>
@@ -391,8 +390,6 @@ void KeyAuth::api::web_login()
 			continue;
 		}
 
-		going = false;
-
 		// keyauth request
 		std::string hwid = utils::get_hwid();
 		auto data =
@@ -487,6 +484,10 @@ void KeyAuth::api::web_login()
 			NULL,
 			NULL
 		);
+
+		if (result == NO_ERROR) {
+			going = false;
+		}
 
 		delete []buffer;
 
@@ -1079,17 +1080,18 @@ std::string KeyAuth::api::fetchonline()
 	return onlineusers;
 }
 
-void KeyAuth::api::forgot(std::string username, std::string email) 
+void KeyAuth::api::forgot(std::string username, std::string email)
 {
 	auto data =
 		XorStr("type=forgot") +
 		XorStr("&username=") + username +
 		XorStr("&email=") + email +
-		XorStr("&sessionid=") +sessionid + 
+		XorStr("&sessionid=") + sessionid +
 		XorStr("&name=") + name +
 		XorStr("&ownerid=") + ownerid;
 	auto response = req(data, url);
 	auto json = response_decoder.parse(response);
+	load_response_data(json);
 }
 
 // credits https://stackoverflow.com/a/3790661
@@ -1119,7 +1121,6 @@ std::string get_str_between_two_str(const std::string& s,
 }
 
 std::string KeyAuth::api::req(std::string data, std::string url) {
-	auto timestart = std::chrono::high_resolution_clock::now();
 	CURL* curl = curl_easy_init();
 	if (!curl)
 		return XorStr("null");
@@ -1148,8 +1149,6 @@ std::string KeyAuth::api::req(std::string data, std::string url) {
 	if (code != CURLE_OK)
 		error(curl_easy_strerror(code));
 
-	auto timeend = std::chrono::high_resolution_clock::now();
-	KeyAuth::api::data.responsetime = std::chrono::duration_cast<std::chrono::milliseconds>(timestart - timeend).count();
 	return to_return;
 }
 void error(std::string message) {
