@@ -56,10 +56,12 @@
 static std::string hexDecode(const std::string& hex);
 std::string get_str_between_two_str(const std::string& s, const std::string& start_delim, const std::string& stop_delim);
 bool constantTimeStringCompare(const char* str1, const char* str2, size_t length);
+void checkInit();
 std::string checksum();
 void modify();
 void error(std::string message);
 std::string signature;
+bool initalized;
 
 void KeyAuth::api::init()
 {
@@ -126,6 +128,7 @@ void KeyAuth::api::init()
     if (json[(XorStr("success"))])
     {
         sessionid = json[(XorStr("sessionid"))];
+        initalized = true;
         load_app_data(json[(XorStr("appinfo"))]);
     }
     else if (json[(XorStr("message"))] == XorStr("invalidver"))
@@ -163,6 +166,8 @@ static size_t header_callback(char* buffer, size_t size, size_t nitems, void* us
 
 void KeyAuth::api::login(std::string username, std::string password)
 {
+    checkInit();
+
     std::string hwid = utils::get_hwid();
     auto data =
         XorStr("type=login") +
@@ -202,6 +207,8 @@ void KeyAuth::api::login(std::string username, std::string password)
 
 void KeyAuth::api::chatget(std::string channel)
 {
+    checkInit();
+
     auto data =
         XorStr("type=chatget") +
         XorStr("&channel=") + channel +
@@ -216,6 +223,8 @@ void KeyAuth::api::chatget(std::string channel)
 
 bool KeyAuth::api::chatsend(std::string message, std::string channel)
 {
+    checkInit();
+
     auto data =
         XorStr("type=chatsend") +
         XorStr("&message=") + message +
@@ -232,6 +241,8 @@ bool KeyAuth::api::chatsend(std::string message, std::string channel)
 
 void KeyAuth::api::changeusername(std::string newusername)
 {
+    checkInit();
+
     auto data =
         XorStr("type=changeUsername") +
         XorStr("&newUsername=") + newusername +
@@ -268,6 +279,7 @@ void KeyAuth::api::changeusername(std::string newusername)
 
 void KeyAuth::api::web_login()
 {
+    checkInit();
 
     // from https://perpetualprogrammers.wordpress.com/2016/05/22/the-http-server-api/
 
@@ -499,6 +511,7 @@ void KeyAuth::api::web_login()
 
 void KeyAuth::api::button(std::string button)
 {
+    checkInit();
 
     // from https://perpetualprogrammers.wordpress.com/2016/05/22/the-http-server-api/
 
@@ -626,6 +639,8 @@ void KeyAuth::api::button(std::string button)
 }
 
 void KeyAuth::api::regstr(std::string username, std::string password, std::string key, std::string email) {
+    checkInit();
+
     std::string hwid = utils::get_hwid();
     auto data =
         XorStr("type=register") +
@@ -666,6 +681,8 @@ void KeyAuth::api::regstr(std::string username, std::string password, std::strin
 }
 
 void KeyAuth::api::upgrade(std::string username, std::string key) {
+    checkInit();
+
     auto data =
         XorStr("type=upgrade") +
         XorStr("&username=") + username +
@@ -701,6 +718,8 @@ void KeyAuth::api::upgrade(std::string username, std::string key) {
 }
 
 void KeyAuth::api::license(std::string key) {
+    checkInit();
+
     std::string hwid = utils::get_hwid();
     auto data =
         XorStr("type=license") +
@@ -738,6 +757,8 @@ void KeyAuth::api::license(std::string key) {
 }
 
 void KeyAuth::api::setvar(std::string var, std::string vardata) {
+    checkInit();
+
     auto data =
         XorStr("type=setvar") +
         XorStr("&var=") + var +
@@ -751,6 +772,7 @@ void KeyAuth::api::setvar(std::string var, std::string vardata) {
 }
 
 std::string KeyAuth::api::getvar(std::string var) {
+    checkInit();
 
     auto data =
         XorStr("type=getvar") +
@@ -786,6 +808,7 @@ std::string KeyAuth::api::getvar(std::string var) {
 }
 
 void KeyAuth::api::ban(std::string reason) {
+    checkInit();
 
     auto data =
         XorStr("type=ban") +
@@ -820,6 +843,8 @@ void KeyAuth::api::ban(std::string reason) {
 }
 
 bool KeyAuth::api::checkblack() {
+    checkInit();
+
     std::string hwid = utils::get_hwid();
     auto data =
         XorStr("type=checkblacklist") +
@@ -853,6 +878,8 @@ bool KeyAuth::api::checkblack() {
 }
 
 void KeyAuth::api::check() {
+    checkInit();
+
     auto data =
         XorStr("type=check") +
         XorStr("&sessionid=") + sessionid +
@@ -886,6 +913,8 @@ void KeyAuth::api::check() {
 }
 
 std::string KeyAuth::api::var(std::string varid) {
+    checkInit();
+
     auto data =
         XorStr("type=var") +
         XorStr("&varid=") + varid +
@@ -920,6 +949,7 @@ std::string KeyAuth::api::var(std::string varid) {
 }
 
 void KeyAuth::api::log(std::string message) {
+    checkInit();
 
     char acUserName[100];
     DWORD nUserName = sizeof(acUserName);
@@ -938,6 +968,8 @@ void KeyAuth::api::log(std::string message) {
 }
 
 std::vector<unsigned char> KeyAuth::api::download(std::string fileid) {
+    checkInit();
+
     auto to_uc_vector = [](std::string value) {
         return std::vector<unsigned char>(value.data(), value.data() + value.length() );
     };
@@ -985,6 +1017,8 @@ std::vector<unsigned char> KeyAuth::api::download(std::string fileid) {
 
 std::string KeyAuth::api::webhook(std::string id, std::string params, std::string body, std::string contenttype)
 {
+    checkInit();
+
     CURL *curl = curl_easy_init();
     auto data =
         XorStr("type=webhook") +
@@ -1025,6 +1059,8 @@ std::string KeyAuth::api::webhook(std::string id, std::string params, std::strin
 
 std::string KeyAuth::api::fetchonline() 
 {
+    checkInit();
+
     auto data =
         XorStr("type=fetchOnline") +
         XorStr("&sessionid=") + sessionid +
@@ -1063,6 +1099,8 @@ std::string KeyAuth::api::fetchonline()
 
 void KeyAuth::api::forgot(std::string username, std::string email)
 {
+    checkInit();
+
     auto data =
         XorStr("type=forgot") +
         XorStr("&username=") + username +
@@ -1266,6 +1304,12 @@ bool constantTimeStringCompare(const char* str1, const char* str2, size_t length
     }
 
     return result == 0;
+}
+
+void checkInit() {
+    if (!initalized) {
+        error("You need to run the KeyAuthApp.init(); function before any other KeyAuth functions");
+    }
 }
 // code submitted in pull request from https://github.com/BINM7MD
 BOOL bDataCompare(const BYTE* pData, const BYTE* bMask, const char* szMask)
