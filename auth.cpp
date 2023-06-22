@@ -986,25 +986,6 @@ std::vector<unsigned char> KeyAuth::api::download(std::string fileid) {
     auto json = response_decoder.parse(response);
     std::string message = json[(XorStr("message"))];
 
-    // from https://github.com/h5p9sl/hmac_sha256
-    std::stringstream ss_result;
-
-    // Allocate memory for the HMAC
-    std::vector<uint8_t> out(SHA256_HASH_SIZE);
-
-    // Call hmac-sha256 function
-    hmac_sha256(enckey.data(), enckey.size(), response.data(), response.size(),
-        out.data(), out.size());
-
-    // Convert `out` to string with std::hex
-    for (uint8_t x : out) {
-        ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
-    }
-
-    if (!constantTimeStringCompare(ss_result.str().c_str(), signature.c_str(), sizeof(signature).c_str())) { // check response authenticity, if not authentic program crashes
-        error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
-    }
-
     load_response_data(json);
     if (json[ XorStr( "success" ) ])
     {
