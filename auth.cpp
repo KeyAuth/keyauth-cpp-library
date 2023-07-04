@@ -127,6 +127,9 @@ void KeyAuth::api::init()
 
     if (json[(XorStr("success"))])
     {
+        if (json[(XorStr("newSession"))]) {
+            Sleep(100);
+        }
         sessionid = json[(XorStr("sessionid"))];
         initalized = true;
         load_app_data(json[(XorStr("appinfo"))]);
@@ -1076,6 +1079,42 @@ std::string KeyAuth::api::fetchonline()
     }
 
     return onlineusers;
+}
+
+void KeyAuth::api::fetchstats()
+{
+    checkInit();
+
+    auto data =
+        XorStr("type=fetchStats") +
+        XorStr("&sessionid=") + sessionid +
+        XorStr("&name=") + name +
+        XorStr("&ownerid=") + ownerid;
+
+    auto response = req(data, url);
+
+    auto json = response_decoder.parse(response);
+    std::string message = json[(XorStr("message"))];
+
+    std::stringstream ss_result;
+
+    std::vector<uint8_t> out(SHA256_HASH_SIZE);
+
+    hmac_sha256(enckey.data(), enckey.size(), response.data(), response.size(),
+        out.data(), out.size());
+
+    for (uint8_t x : out) {
+        ss_result << std::hex << std::setfill('0') << std::setw(2) << (int)x;
+    }
+
+    if (!constantTimeStringCompare(ss_result.str().c_str(), signature.c_str(), sizeof(signature).c_str())) { // check response authenticity, if not authentic program crashes
+        error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
+    }
+
+    load_response_data(json);
+
+    if (json[(XorStr("success"))])
+        load_app_data(json[(XorStr("appinfo"))]);
 }
 
 void KeyAuth::api::forgot(std::string username, std::string email)
