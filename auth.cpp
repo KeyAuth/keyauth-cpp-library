@@ -291,17 +291,81 @@ void KeyAuth::api::web_login()
     HTTPAPI_VERSION version = HTTPAPI_VERSION_2;
     result = HttpInitialize(version, HTTP_INITIALIZE_SERVER, 0);
 
+    if (result == ERROR_INVALID_PARAMETER) {
+        MessageBoxA(NULL, "The Flags parameter contains an unsupported value.", "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
+    if (result != NO_ERROR) {
+        MessageBoxA(NULL, "System error for Initialize", "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
+
     // Create server session.
     HTTP_SERVER_SESSION_ID serverSessionId;
     result = HttpCreateServerSession(version, &serverSessionId, 0);
+
+    if (result == ERROR_REVISION_MISMATCH) {
+        MessageBoxA(NULL, "Version for session invalid", "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
+
+    if (result == ERROR_INVALID_PARAMETER) {
+        MessageBoxA(NULL, "pServerSessionId parameter is null", "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
+
+    if (result != NO_ERROR) {
+        MessageBoxA(NULL, "System error for HttpCreateServerSession", "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
 
     // Create URL group.
     HTTP_URL_GROUP_ID groupId;
     result = HttpCreateUrlGroup(serverSessionId, &groupId, 0);
 
+    if (result == ERROR_INVALID_PARAMETER) {
+        MessageBoxA(NULL, "Url group create parameter error", "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
+
+    if (result != NO_ERROR) {
+        MessageBoxA(NULL, "System error for HttpCreateUrlGroup", "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
+
     // Create request queue.
     HANDLE requestQueueHandle;
     result = HttpCreateRequestQueue(version, NULL, NULL, 0, &requestQueueHandle);
+
+    if (result == ERROR_REVISION_MISMATCH) {
+        MessageBoxA(NULL, "Wrong version", "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
+
+    if (result == ERROR_INVALID_PARAMETER) {
+        MessageBoxA(NULL, "Byte length exceeded", "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
+
+    if (result == ERROR_ALREADY_EXISTS) {
+        MessageBoxA(NULL, "pName already used", "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
+
+    if (result == ERROR_ACCESS_DENIED) {
+        MessageBoxA(NULL, "queue access denied", "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
+
+    if (result == ERROR_DLL_INIT_FAILED) {
+        MessageBoxA(NULL, "Initialize not called", "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
+
+    if (result != NO_ERROR) {
+        MessageBoxA(NULL, "System error for HttpCreateRequestQueue", "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
 
     // Attach request queue to URL group.
     HTTP_BINDING_INFO info;
@@ -309,9 +373,44 @@ void KeyAuth::api::web_login()
     info.RequestQueueHandle = requestQueueHandle;
     result = HttpSetUrlGroupProperty(groupId, HttpServerBindingProperty, &info, sizeof(info));
 
+    if (result == ERROR_INVALID_PARAMETER) {
+        MessageBoxA(NULL, XorStr("Invalid parameter").c_str(), "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
+
+    if (result != NO_ERROR) {
+        MessageBoxA(NULL, XorStr("System error for HttpSetUrlGroupProperty").c_str(), "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
+
     // Add URLs to URL group.
     PCWSTR url = L"http://localhost:1337/handshake";
     result = HttpAddUrlToUrlGroup(groupId, url, 0, 0);
+
+    if (result == ERROR_ACCESS_DENIED) {
+        MessageBoxA(NULL, XorStr("No permissions to run web server").c_str(), "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
+
+    if (result == ERROR_ALREADY_EXISTS) {
+        MessageBoxA(NULL, XorStr("You are running this program already").c_str(), "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
+
+    if (result == ERROR_INVALID_PARAMETER) {
+        MessageBoxA(NULL, XorStr("ERROR_INVALID_PARAMETER for HttpAddUrlToUrlGroup").c_str(), "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
+
+    if (result == ERROR_SHARING_VIOLATION) {
+        MessageBoxA(NULL, XorStr("Another program is using the webserver. Close Razer Chroma mouse software if you use that. Try to restart computer.").c_str(), "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
+
+    if (result != NO_ERROR) {
+        MessageBoxA(NULL, XorStr("System error for HttpAddUrlToUrlGroup").c_str(), "Error", MB_ICONEXCLAMATION);
+        exit(0);
+    }
 
     // Announce that it is running.
     // wprintf(L"Listening. Please submit requests to: %s\n", url);
@@ -361,18 +460,6 @@ void KeyAuth::api::web_login()
             response.StatusCode = 200;
             response.pReason = static_cast<PCSTR>(XorStr("OK").c_str());
             response.ReasonLength = (USHORT)strlen(response.pReason);
-
-            response.Headers.KnownHeaders[HttpHeaderServer].pRawValue = XorStr("Apache/2.4.48 nginx/1.12.2").c_str(); // confuse anyone looking at server header
-            response.Headers.KnownHeaders[HttpHeaderServer].RawValueLength = 24;
-
-            response.Headers.KnownHeaders[HttpHeaderVia].pRawValue = XorStr("hugzho's big brain").c_str();
-            response.Headers.KnownHeaders[HttpHeaderVia].RawValueLength = 18;
-
-            response.Headers.KnownHeaders[HttpHeaderRetryAfter].pRawValue = XorStr("never lmao").c_str();
-            response.Headers.KnownHeaders[HttpHeaderRetryAfter].RawValueLength = 10;
-
-            response.Headers.KnownHeaders[HttpHeaderLocation].pRawValue = XorStr("your kernel ;)").c_str();
-            response.Headers.KnownHeaders[HttpHeaderLocation].RawValueLength = 14;
 
             // https://social.msdn.microsoft.com/Forums/vstudio/en-US/6d468747-2221-4f4a-9156-f98f355a9c08/using-httph-to-set-up-an-https-server-that-is-queried-by-a-client-that-uses-cross-origin-requests?forum=vcgeneral
             HTTP_UNKNOWN_HEADER  accessControlHeader;
@@ -460,18 +547,6 @@ void KeyAuth::api::web_login()
             success = false;
         }
         // end keyauth request
-
-        response.Headers.KnownHeaders[HttpHeaderServer].pRawValue = XorStr("Apache/2.4.48 nginx/1.12.2").c_str(); // confuse anyone looking at server header
-        response.Headers.KnownHeaders[HttpHeaderServer].RawValueLength = 24;
-
-        response.Headers.KnownHeaders[HttpHeaderVia].pRawValue = XorStr("hugzho's big brain").c_str();
-        response.Headers.KnownHeaders[HttpHeaderVia].RawValueLength = 18;
-
-        response.Headers.KnownHeaders[HttpHeaderRetryAfter].pRawValue = XorStr("never lmao").c_str();
-        response.Headers.KnownHeaders[HttpHeaderRetryAfter].RawValueLength = 10;
-
-        response.Headers.KnownHeaders[HttpHeaderLocation].pRawValue = XorStr("your kernel ;)").c_str();
-        response.Headers.KnownHeaders[HttpHeaderLocation].RawValueLength = 14;
 
         // https://social.msdn.microsoft.com/Forums/vstudio/en-US/6d468747-2221-4f4a-9156-f98f355a9c08/using-httph-to-set-up-an-https-server-that-is-queried-by-a-client-that-uses-cross-origin-requests?forum=vcgeneral
         HTTP_UNKNOWN_HEADER  accessControlHeader;
@@ -596,18 +671,6 @@ void KeyAuth::api::button(std::string button)
         response.StatusCode = 420;
         response.pReason = XorStr("SHEESH").c_str();
         response.ReasonLength = (USHORT)strlen(response.pReason);
-
-        response.Headers.KnownHeaders[HttpHeaderServer].pRawValue = XorStr("Apache/2.4.48 nginx/1.12.2").c_str(); // confuse anyone looking at server header
-        response.Headers.KnownHeaders[HttpHeaderServer].RawValueLength = 24;
-
-        response.Headers.KnownHeaders[HttpHeaderVia].pRawValue = XorStr("hugzho's big brain").c_str();
-        response.Headers.KnownHeaders[HttpHeaderVia].RawValueLength = 18;
-
-        response.Headers.KnownHeaders[HttpHeaderRetryAfter].pRawValue = XorStr("never lmao").c_str();
-        response.Headers.KnownHeaders[HttpHeaderRetryAfter].RawValueLength = 10;
-
-        response.Headers.KnownHeaders[HttpHeaderLocation].pRawValue = XorStr("your kernel ;)").c_str();
-        response.Headers.KnownHeaders[HttpHeaderLocation].RawValueLength = 14;
 
         // https://social.msdn.microsoft.com/Forums/vstudio/en-US/6d468747-2221-4f4a-9156-f98f355a9c08/using-httph-to-set-up-an-https-server-that-is-queried-by-a-client-that-uses-cross-origin-requests?forum=vcgeneral
         HTTP_UNKNOWN_HEADER  accessControlHeader;
