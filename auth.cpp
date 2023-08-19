@@ -87,13 +87,15 @@ void KeyAuth::api::init()
     enckey = sentKey + XorStr("-") + secret;
 
     std::string hash = checksum();
+    CURL* curl = curl_easy_init();
     auto data =
         XorStr("type=init") +
         XorStr("&ver=") + version +
         XorStr("&hash=") + hash +
         XorStr("&enckey=") + sentKey +
-        XorStr("&name=") + name +
+        XorStr("&name=") + curl_easy_escape(curl, name.c_str(), 0) +
         XorStr("&ownerid=") + ownerid;
+    curl_easy_cleanup(curl);
 
     auto response = req(data, url);
 
