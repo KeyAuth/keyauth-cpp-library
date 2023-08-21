@@ -41,3 +41,5 @@ x86 :
 3- Lib Configuration -> Advanced -> Character Set ->  Multi-Byte Character Set
 
 4- Lib Configuration -> Preprocessor definiton for CURL -> CURL_STATICLIB
+
+Looking for a Discord bot made by the KeyAuth & RestoreCord founder that you can use to backup your Discord members, server settings, and messages? Go to https://vaultcord.com
