@@ -15,7 +15,11 @@ namespace KeyAuth {
 	class api {
 	public:
 
-		std::string name, ownerid, secret, version, url;
+		std::string name;
+		std::string ownerid;
+		std::string secret;
+		std::string version;
+		std::string url;
 
 		api(std::string name, std::string ownerid, std::string secret, std::string version, std::string url) : name(name), ownerid(ownerid), secret(secret), version(version), url(url) {}
 

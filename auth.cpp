@@ -10,7 +10,7 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-#include <auth.hpp>
+#include "auth.hpp"
 #include <strsafe.h> 
 #include <windows.h>
 #include <string>
@@ -21,7 +21,7 @@
 
 #include <sstream> 
 #include <iomanip> 
-#include <xorstr.hpp>
+#include "xorstr.hpp"
 #include <fstream> 
 #include <http.h>
 #include <stdlib.h>
@@ -50,6 +50,7 @@
 #include <algorithm>
 
 #include "Security.hpp"
+#include "stringEncrypt.hpp"
 
 #define SHA256_HASH_SIZE 32
 
@@ -69,7 +70,7 @@ void KeyAuth::api::init()
 
     if (ownerid.length() != 10 || secret.length() != 64)
     {
-        MessageBoxA(0, XorStr("Application Not Setup Correctly. Please Watch Video Linked in main.cpp").c_str(), NULL, MB_ICONERROR);
+        MessageBoxA(0, OBFUSCATE_STR("Application Not Setup Correctly. Please Watch Video Linked in main.cpp"), NULL, MB_ICONERROR);
         exit(0);
     }
 
@@ -88,24 +89,24 @@ void KeyAuth::api::init()
 
     std::string hash = checksum();
     CURL* curl = curl_easy_init();
-    auto data =
+    std::string data =
         XorStr("type=init") +
         XorStr("&ver=") + version +
-        XorStr("&hash=") + hash +
-        XorStr("&enckey=") + sentKey +
-        XorStr("&name=") + curl_easy_escape(curl, name.c_str(), 0) +
-        XorStr("&ownerid=") + ownerid;
+        OBFUSCATE_STR("&hash=") + hash +
+        OBFUSCATE_STR("&enckey=") + sentKey +
+        OBFUSCATE_STR("&name=") + curl_easy_escape(curl, name.c_str(), 0) +
+        OBFUSCATE_STR("&ownerid=") + ownerid;
     curl_easy_cleanup(curl);
 
     auto response = req(data, url);
 
-    if (response == XorStr("KeyAuth_Invalid")) {
-        MessageBoxA(0, XorStr("Application not found. Please copy strings directly from dashboard.").c_str(), NULL, MB_ICONERROR);
+    if (response == OBFUSCATE_STR("KeyAuth_Invalid")) {
+        MessageBoxA(0, OBFUSCATE_STR("Application not found. Please copy strings directly from dashboard."), NULL, MB_ICONERROR);
         exit(0);
     }
 
     auto json = response_decoder.parse(response);
-    std::string message = json[(XorStr("message"))];
+    std::string message = json[(OBFUSCATE_STR("message"))];
 
     // from https://github.com/h5p9sl/hmac_sha256
     std::stringstream ss_result;
@@ -127,21 +128,21 @@ void KeyAuth::api::init()
 
     load_response_data(json);
 
-    if (json[(XorStr("success"))])
+    if (json[(OBFUSCATE_STR("success"))])
     {
-        if (json[(XorStr("newSession"))]) {
+        if (json[(OBFUSCATE_STR("newSession"))]) {
             Sleep(100);
         }
-        sessionid = json[(XorStr("sessionid"))];
+        sessionid = json[(OBFUSCATE_STR("sessionid"))];
         initalized = true;
-        load_app_data(json[(XorStr("appinfo"))]);
+        load_app_data(json[(OBFUSCATE_STR("appinfo"))]);
     }
-    else if (json[(XorStr("message"))] == XorStr("invalidver"))
+    else if (json[(OBFUSCATE_STR("message"))] == OBFUSCATE_STR("invalidver"))
     {
-        std::string dl = json[(XorStr("download"))];
+        std::string dl = json[(OBFUSCATE_STR("download"))];
         if (dl == "")
         {
-            MessageBoxA(0, XorStr("Version in the loader does match the one on the dashboard, and the download link on dashboard is blank.\n\nTo fix this, either fix the loader so it matches the version on the dashboard. Or if you intended for it to have different versions, update the download link on dashboard so it will auto-update correctly.").c_str(), NULL, MB_ICONERROR);
+            MessageBoxA(0, OBFUSCATE_STR("Version in the loader does match the one on the dashboard, and the download link on dashboard is blank.\n\nTo fix this, either fix the loader so it matches the version on the dashboard. Or if you intended for it to have different versions, update the download link on dashboard so it will auto-update correctly."), NULL, MB_ICONERROR);
         }
         else
         {
@@ -174,17 +175,17 @@ void KeyAuth::api::login(std::string username, std::string password)
     checkInit();
 
     std::string hwid = utils::get_hwid();
-    auto data =
+    std::string data =
         XorStr("type=login") +
         XorStr("&username=") + username +
-        XorStr("&pass=") + password +
-        XorStr("&hwid=") + hwid +
-        XorStr("&sessionid=") + sessionid +
-        XorStr("&name=") + name +
-        XorStr("&ownerid=") + ownerid;
+        OBFUSCATE_STR("&pass=") + password +
+        OBFUSCATE_STR("&hwid=") + hwid +
+        OBFUSCATE_STR("&sessionid=") + sessionid +
+        OBFUSCATE_STR("&name=") + name +
+        OBFUSCATE_STR("&ownerid=") + ownerid;
     auto response = req(data, url);
     auto json = response_decoder.parse(response);
-    std::string message = json[(XorStr("message"))];
+    std::string message = json[(OBFUSCATE_STR("message"))];
 
     // from https://github.com/h5p9sl/hmac_sha256
     std::stringstream ss_result;
@@ -206,20 +207,20 @@ void KeyAuth::api::login(std::string username, std::string password)
     }
 
     load_response_data(json);
-    if (json[(XorStr("success"))])
-        load_user_data(json[(XorStr("info"))]);
+    if (json[(OBFUSCATE_STR("success"))])
+        load_user_data(json[(OBFUSCATE_STR("info"))]);
 }
 
 void KeyAuth::api::chatget(std::string channel)
 {
     checkInit();
 
-    auto data =
+    std::string data =
         XorStr("type=chatget") +
         XorStr("&channel=") + channel +
-        XorStr("&sessionid=") + sessionid +
-        XorStr("&name=") + name +
-        XorStr("&ownerid=") + ownerid;
+        OBFUSCATE_STR("&sessionid=") + sessionid +
+        OBFUSCATE_STR("&name=") + name +
+        OBFUSCATE_STR("&ownerid=") + ownerid;
 
     auto response = req(data, url);
     auto json = response_decoder.parse(response);
@@ -233,15 +234,15 @@ bool KeyAuth::api::chatsend(std::string message, std::string channel)
     auto data =
         XorStr("type=chatsend") +
         XorStr("&message=") + message +
-        XorStr("&channel=") + channel +
-        XorStr("&sessionid=") + sessionid +
-        XorStr("&name=") + name +
-        XorStr("&ownerid=") + ownerid;
+        OBFUSCATE_STR("&channel=") + channel +
+        OBFUSCATE_STR("&sessionid=") + sessionid +
+        OBFUSCATE_STR("&name=") + name +
+        OBFUSCATE_STR("&ownerid=") + ownerid;
 
     auto response = req(data, url);
     auto json = response_decoder.parse(response);
     load_response_data(json);
-    return json[("success")];
+    return json[(OBFUSCATE_STR("success"))];
 }
 
 void KeyAuth::api::changeusername(std::string newusername)
@@ -251,13 +252,13 @@ void KeyAuth::api::changeusername(std::string newusername)
     auto data =
         XorStr("type=changeUsername") +
         XorStr("&newUsername=") + newusername +
-        XorStr("&sessionid=") + sessionid +
-        XorStr("&name=") + name +
-        XorStr("&ownerid=") + ownerid;
+        OBFUSCATE_STR("&sessionid=") + sessionid +
+        OBFUSCATE_STR("&name=") + name +
+        OBFUSCATE_STR("&ownerid=") + ownerid;
 
     auto response = req(data, url);
     auto json = response_decoder.parse(response);
-    std::string message = json[(XorStr("message"))];
+    std::string message = json[(OBFUSCATE_STR("message"))];
 
     // from https://github.com/h5p9sl/hmac_sha256
     std::stringstream ss_result;
@@ -497,14 +498,14 @@ void KeyAuth::api::web_login()
 
         // keyauth request
         std::string hwid = utils::get_hwid();
-        auto data =
+        std::string data =
             XorStr("type=login") +
             XorStr("&username=") + user +
-            XorStr("&token=") + token +
-            XorStr("&hwid=") + hwid +
-            XorStr("&sessionid=") + sessionid +
-            XorStr("&name=") + name +
-            XorStr("&ownerid=") + ownerid;
+            OBFUSCATE_STR("&token=") + token +
+            OBFUSCATE_STR("&hwid=") + hwid +
+            OBFUSCATE_STR("&sessionid=") + sessionid +
+            OBFUSCATE_STR("&name=") + name +
+            OBFUSCATE_STR("&ownerid=") + ownerid;
         auto resp = req(data, api::url);
         auto json = response_decoder.parse(resp);
         std::string message = json[(XorStr("message"))];
@@ -710,16 +711,16 @@ void KeyAuth::api::regstr(std::string username, std::string password, std::strin
     checkInit();
 
     std::string hwid = utils::get_hwid();
-    auto data =
+    std::string data =
         XorStr("type=register") +
         XorStr("&username=") + username +
-        XorStr("&pass=") + password +
-        XorStr("&key=") + key +
-        XorStr("&email=") + email +
-        XorStr("&hwid=") + hwid +
-        XorStr("&sessionid=") + sessionid +
-        XorStr("&name=") + name +
-        XorStr("&ownerid=") + ownerid;
+        OBFUSCATE_STR("&pass=") + password +
+        OBFUSCATE_STR("&key=") + key +
+        OBFUSCATE_STR("&email=") + email +
+        OBFUSCATE_STR("&hwid=") + hwid +
+        OBFUSCATE_STR("&sessionid=") + sessionid +
+        OBFUSCATE_STR("&name=") + name +
+        OBFUSCATE_STR("&ownerid=") + ownerid;
     auto response = req(data, url);
     auto json = response_decoder.parse(response);
     std::string message = json[(XorStr("message"))];
@@ -744,23 +745,23 @@ void KeyAuth::api::regstr(std::string username, std::string password, std::strin
     }
 
     load_response_data(json);
-    if (json[(XorStr("success"))])
-        load_user_data(json[(XorStr("info"))]);
+    if (json[(OBFUSCATE_STR("success"))])
+        load_user_data(json[(OBFUSCATE_STR("info"))]);
 }
 
 void KeyAuth::api::upgrade(std::string username, std::string key) {
     checkInit();
 
-    auto data =
+    std::string data =
         XorStr("type=upgrade") +
         XorStr("&username=") + username +
-        XorStr("&key=") + key +
-        XorStr("&sessionid=") + sessionid +
-        XorStr("&name=") + name +
-        XorStr("&ownerid=") + ownerid;
+        OBFUSCATE_STR("&key=") + key +
+        OBFUSCATE_STR("&sessionid=") + sessionid +
+        OBFUSCATE_STR("&name=") + name +
+        OBFUSCATE_STR("&ownerid=") + ownerid;
     auto response = req(data, url);
     auto json = response_decoder.parse(response);
-    std::string message = json[(XorStr("message"))];
+    std::string message = json[(OBFUSCATE_STR("message"))];
 
     // from https://github.com/h5p9sl/hmac_sha256
     std::stringstream ss_result;
@@ -781,7 +782,7 @@ void KeyAuth::api::upgrade(std::string username, std::string key) {
         error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
     }
 
-    json[(XorStr("success"))] = false;
+    json[(OBFUSCATE_STR("success"))] = false;
     load_response_data(json);
 }
 
@@ -789,16 +790,16 @@ void KeyAuth::api::license(std::string key) {
     checkInit();
 
     std::string hwid = utils::get_hwid();
-    auto data =
+    std::string data =
         XorStr("type=license") +
         XorStr("&key=") + key +
-        XorStr("&hwid=") + hwid +
-        XorStr("&sessionid=") + sessionid +
-        XorStr("&name=") + name +
-        XorStr("&ownerid=") + ownerid;
+        OBFUSCATE_STR("&hwid=") + hwid +
+        OBFUSCATE_STR("&sessionid=") + sessionid +
+        OBFUSCATE_STR("&name=") + name +
+        OBFUSCATE_STR("&ownerid=") + ownerid;
     auto response = req(data, url);
     auto json = response_decoder.parse(response);
-    std::string message = json[(XorStr("message"))];
+    std::string message = json[(OBFUSCATE_STR("message"))];
 
     // from https://github.com/h5p9sl/hmac_sha256
     std::stringstream ss_result;
@@ -820,20 +821,20 @@ void KeyAuth::api::license(std::string key) {
     }
 
     load_response_data(json);
-    if (json[(XorStr("success"))])
-        load_user_data(json[(XorStr("info"))]);
+    if (json[(OBFUSCATE_STR("success"))])
+        load_user_data(json[(OBFUSCATE_STR("info"))]);
 }
 
 void KeyAuth::api::setvar(std::string var, std::string vardata) {
     checkInit();
 
-    auto data =
+    std::string data =
         XorStr("type=setvar") +
         XorStr("&var=") + var +
-        XorStr("&data=") + vardata +
-        XorStr("&sessionid=") + sessionid +
-        XorStr("&name=") + name +
-        XorStr("&ownerid=") + ownerid;
+        OBFUSCATE_STR("&data=") + vardata +
+        OBFUSCATE_STR("&sessionid=") + sessionid +
+        OBFUSCATE_STR("&name=") + name +
+        OBFUSCATE_STR("&ownerid=") + ownerid;
     auto response = req(data, url);
     auto json = response_decoder.parse(response);
     load_response_data(json);
@@ -842,15 +843,15 @@ void KeyAuth::api::setvar(std::string var, std::string vardata) {
 std::string KeyAuth::api::getvar(std::string var) {
     checkInit();
 
-    auto data =
+    std::string data =
         XorStr("type=getvar") +
         XorStr("&var=") + var +
-        XorStr("&sessionid=") + sessionid +
-        XorStr("&name=") + name +
-        XorStr("&ownerid=") + ownerid;
+        OBFUSCATE_STR("&sessionid=") + sessionid +
+        OBFUSCATE_STR("&name=") + name +
+        OBFUSCATE_STR("&ownerid=") + ownerid;
     auto response = req(data, url);
     auto json = response_decoder.parse(response);
-    std::string message = json[(XorStr("message"))];
+    std::string message = json[(OBFUSCATE_STR("message"))];
 
     // from https://github.com/h5p9sl/hmac_sha256
     std::stringstream ss_result;
@@ -872,21 +873,21 @@ std::string KeyAuth::api::getvar(std::string var) {
     }
 
     load_response_data(json);
-    return !json[(XorStr("response"))].is_null() ? json[(XorStr("response"))] : XorStr("");
+    return !json[(OBFUSCATE_STR("response"))].is_null() ? json[(OBFUSCATE_STR("response"))] : "";
 }
 
 void KeyAuth::api::ban(std::string reason) {
     checkInit();
 
-    auto data =
+    std::string data =
         XorStr("type=ban") +
         XorStr("&reason=") + reason +
-        XorStr("&sessionid=") + sessionid +
-        XorStr("&name=") + name +
-        XorStr("&ownerid=") + ownerid;
+        OBFUSCATE_STR("&sessionid=") + sessionid +
+        OBFUSCATE_STR("&name=") + name +
+        OBFUSCATE_STR("&ownerid=") + ownerid;
     auto response = req(data, url);
     auto json = response_decoder.parse(response);
-    std::string message = json[(XorStr("message"))];
+    std::string message = json[(OBFUSCATE_STR("message"))];
 
     // from https://github.com/h5p9sl/hmac_sha256
     std::stringstream ss_result;
@@ -914,15 +915,15 @@ bool KeyAuth::api::checkblack() {
     checkInit();
 
     std::string hwid = utils::get_hwid();
-    auto data =
+    std::string data =
         XorStr("type=checkblacklist") +
         XorStr("&hwid=") + hwid +
-        XorStr("&sessionid=") + sessionid +
-        XorStr("&name=") + name +
-        XorStr("&ownerid=") + ownerid;
+        OBFUSCATE_STR("&sessionid=") + sessionid +
+        OBFUSCATE_STR("&name=") + name +
+        OBFUSCATE_STR("&ownerid=") + ownerid;
     auto response = req(data, url);
     auto json = response_decoder.parse(response);
-    std::string message = json[(XorStr("message"))];
+    std::string message = json[(OBFUSCATE_STR("message"))];
 
     // from https://github.com/h5p9sl/hmac_sha256
     std::stringstream ss_result;
@@ -1068,7 +1069,7 @@ std::string KeyAuth::api::webhook(std::string id, std::string params, std::strin
 {
     checkInit();
 
-    CURL *curl = curl_easy_init();
+    CURL* curl = curl_easy_init();
     auto data =
         XorStr("type=webhook") +
         XorStr("&webid=") + id +
@@ -1103,7 +1104,7 @@ std::string KeyAuth::api::webhook(std::string id, std::string params, std::strin
     }
 
     load_response_data(json);
-    return !json[(XorStr("response"))].is_null() ? json[(XorStr("response"))] : XorStr("");
+    return !json[(XorStr("response"))].is_null() ? json[(XorStr("response"))] : "";
 }
 
 std::string KeyAuth::api::fetchonline() 
@@ -1430,7 +1431,7 @@ void modify()
 
     while (true)
     {
-        if ( check_section_integrity( XorStr( ".text" ).c_str( ), false ) )
+        if ( check_section_integrity(XorStr( ".text" ).c_str( ), false ) )
         {
             error("check_section_integrity() failed, don't tamper with the program.");
         }

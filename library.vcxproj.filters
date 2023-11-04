@@ -194,6 +194,12 @@
     <ClInclude Include="Security.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="stringEncrypt.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="random.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Library Include="curl\libcurl.lib">

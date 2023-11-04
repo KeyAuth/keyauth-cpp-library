@@ -217,8 +217,10 @@
     <ClInclude Include="nlohmann\ordered_map.hpp" />
     <ClInclude Include="nlohmann\thirdparty\hedley\hedley.hpp" />
     <ClInclude Include="nlohmann\thirdparty\hedley\hedley_undef.hpp" />
+    <ClInclude Include="random.hpp" />
     <ClInclude Include="Security.hpp" />
     <ClInclude Include="sha256.h" />
+    <ClInclude Include="stringEncrypt.hpp" />
     <ClInclude Include="utils.hpp" />
     <ClInclude Include="xorstr.hpp" />
   </ItemGroup>
