@@ -124,7 +124,6 @@ namespace KeyAuth {
 				api::data.channeldata.push_back(output);
 			}
 		}
-		}
 
 		nlohmann::json response_decoder;
 
