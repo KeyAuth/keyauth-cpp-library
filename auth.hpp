@@ -112,17 +112,18 @@ namespace KeyAuth {
 		void load_channel_data(nlohmann::json data) {
 			api::data.success = data["success"];
 			api::data.message = data["message"];
-			for (auto sub : data["messages"])
-			{
-				std::string authoroutput = sub[("author")];
-				std::string messageoutput = sub[("message")];
-				std::string timestampoutput = sub[("timestamp")];
+			for (const auto sub : data["messages"]) {
+
+				std::string authoroutput = sub["author"];
+				std::string messageoutput = sub["message"];
+				int timestamp = sub["timestamp"]; std::string timestampoutput = std::to_string(timestamp);
 				authoroutput.erase(remove(authoroutput.begin(), authoroutput.end(), '"'), authoroutput.end());
 				messageoutput.erase(remove(messageoutput.begin(), messageoutput.end(), '"'), messageoutput.end());
 				timestampoutput.erase(remove(timestampoutput.begin(), timestampoutput.end(), '"'), timestampoutput.end());
 				channel_struct output = { authoroutput , messageoutput, timestampoutput };
 				api::data.channeldata.push_back(output);
 			}
+		}
 		}
 
 		nlohmann::json response_decoder;
