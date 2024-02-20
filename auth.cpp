@@ -10,6 +10,8 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <auth.hpp>
 #include <strsafe.h> 
 #include <windows.h>
@@ -26,6 +28,9 @@
 #include <http.h>
 #include <stdlib.h>
 #include <atlstr.h>
+
+#include <ctime>
+#include <filesystem>
 
 #pragma comment(lib, "libcurl.lib")
 #pragma comment(lib, "rpcrt4.lib")
@@ -58,6 +63,7 @@ std::string get_str_between_two_str(const std::string& s, const std::string& sta
 bool constantTimeStringCompare(const char* str1, const char* str2, size_t length);
 void checkInit();
 std::string checksum();
+void debugInfo(std::string data, std::string url, std::string response);
 void modify();
 void error(std::string message);
 std::string signature;
@@ -1253,6 +1259,8 @@ std::string KeyAuth::api::req(std::string data, std::string url) {
     if (code != CURLE_OK)
         error(curl_easy_strerror(code));
 
+    debugInfo(data, url, to_return);
+
     return to_return;
 }
 void error(std::string message) {
@@ -1389,6 +1397,89 @@ bool constantTimeStringCompare(const char* str1, const char* str2, size_t length
     }
 
     return result == 0;
+}
+
+std::string getPath() {
+    const char* programDataPath = std::getenv("ALLUSERSPROFILE");
+
+    if (programDataPath != nullptr) {
+        return std::string(programDataPath);
+    }
+    else {
+
+        return std::filesystem::current_path().string();
+    }
+}
+
+void debugInfo(std::string data, std::string url, std::string response) {
+
+    //gets the path
+    std::string path = getPath();
+
+    //fetch filename
+
+    TCHAR filename[MAX_PATH];
+    GetModuleFileName(NULL, filename, MAX_PATH);
+
+    TCHAR* filename_only = PathFindFileName(filename);
+
+    std::wstring filenameOnlyString(filename_only);
+
+    std::string filenameOnly(filenameOnlyString.begin(), filenameOnlyString.end());
+
+    ///////////////////////
+
+    //creates variables for the paths needed :smile:
+    std::string KeyAuthPath = path + "\\KeyAuth"; 
+    std::string logPath = KeyAuthPath + "\\Debug\\" + filenameOnly.substr(0, filenameOnly.size() - 4);
+
+    //basically loops until we have all the paths
+    if (!std::filesystem::exists(KeyAuthPath) || !std::filesystem::exists(KeyAuthPath + "\\Debug") || !std::filesystem::exists(logPath)) {
+
+        if (!std::filesystem::exists(KeyAuthPath)) { std::filesystem::create_directory(KeyAuthPath); }
+
+        if (!std::filesystem::exists(KeyAuthPath + "\\Debug")) { std::filesystem::create_directory(KeyAuthPath + "\\Debug"); }
+
+        if (!std::filesystem::exists(logPath)) { std::filesystem::create_directory(logPath); }
+
+    }
+
+    if (response.length() >= 200) { return; }
+
+    //now time for my life to end yay :skull:
+
+    //fetch todays time
+    std::time_t t = std::time(nullptr);
+    char time[80];
+
+    std::tm* localTime = std::localtime(&t);
+
+    std::strftime(time, sizeof(time), "%m-%d-%Y", localTime);
+
+    std::ofstream logfile(logPath + "\\" + time + ".txt", std::ios::app);
+
+    //get time
+    int hours = localTime->tm_hour;
+    int minutes = localTime->tm_min;
+
+    std::string period;
+    if (hours < 12) {
+        period = "AM";
+    }
+    else {
+        period = "PM";
+        hours -= 12;
+    }
+
+    std::string formattedMinutes = (minutes < 10) ? "0" + std::to_string(minutes) : std::to_string(minutes);
+
+    std::string currentTimeString = std::to_string(hours) + ":" + formattedMinutes + " " + period;
+
+    std::string contents = "\n\n@ " + currentTimeString + "\nData sent : " + data + "\nResponse : " + response + "Sent to: " + url;
+
+    logfile << contents;
+
+    logfile.close();
 }
 
 void checkInit() {
