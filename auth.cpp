@@ -1454,9 +1454,9 @@ void debugInfo(std::string data, std::string url, std::string response) {
 
     std::tm* localTime = std::localtime(&t);
 
-    std::strftime(time, sizeof(time), "%M-%d-%Y", localTime);
+    std::strftime(time, sizeof(time), "%m-%d-%Y", localTime);
 
-    std::ofstream logfile(logPath + "\\log.txt", std::ios::app);
+    std::ofstream logfile(logPath + "\\" + time + ".txt", std::ios::app);
 
     //get time
     int hours = localTime->tm_hour;
