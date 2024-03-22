@@ -1261,6 +1261,26 @@ std::string KeyAuth::api::req(std::string data, std::string url) {
 
     debugInfo(data, url, to_return);
 
+    struct curl_certinfo* ci;
+    code = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &ci);
+
+    if (!code) {
+        bool issuer_found = false;
+
+        for (int i = 0; i < ci->num_of_certs; i++) {
+            struct curl_slist* slist;
+
+            for (slist = ci->certinfo[i]; slist; slist = slist->next) {
+                if (std::strstr(slist->data, XorStr("Google Trust Services").c_str()) != NULL || std::strstr(slist->data, XorStr("Let's Encrypt").c_str()) != NULL) {
+                    issuer_found = true;
+                }
+            }
+        }
+
+        if (!issuer_found)
+            error(XorStr("SSL certificate couldn't be verified"));
+    }
+
     return to_return;
 }
 void error(std::string message) {
