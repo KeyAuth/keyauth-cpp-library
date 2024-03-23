@@ -250,7 +250,7 @@ bool KeyAuth::api::chatsend(std::string message, std::string channel)
     return json[("success")];
 }
 
-void KeyAuth::api::changeusername(std::string newusername)
+void KeyAuth::api::changeUsername(std::string newusername)
 {
     checkInit();
 
@@ -1143,7 +1143,7 @@ std::string KeyAuth::api::fetchonline()
 
     std::string onlineusers;
 
-    int y = atoi(api::data.numOnlineUsers.c_str());
+    int y = atoi(api::app_data.numOnlineUsers.c_str());
     for (int i = 0; i < y; i++)
     {
         onlineusers.append(json[XorStr("users")][i][XorStr("credential")]); onlineusers.append(XorStr("\n"));
