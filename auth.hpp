@@ -37,7 +37,7 @@ namespace KeyAuth {
 		void regstr(std::string username, std::string password, std::string key, std::string email = "");
 		void chatget(std::string channel);
 		bool chatsend(std::string message, std::string channel);
-		void changeusername(std::string newusername);
+		void changeUsername(std::string newusername);
 		std::string fetchonline();
 		void fetchstats();
 		void forgot(std::string username, std::string email);
@@ -48,14 +48,9 @@ namespace KeyAuth {
 			std::string expiry;
 		};
 
-		class data_class {
+		class userdata {
 		public:
-			// app data
-			std::string numUsers;
-			std::string numOnlineUsers;
-			std::string numKeys;
-			std::string version;
-			std::string customerPanelLink;
+
 			// user data
 			std::string username;
 			std::string ip;
@@ -64,54 +59,71 @@ namespace KeyAuth {
 			std::string lastlogin;
 
 			std::vector<subscriptions_class> subscriptions;
+		};
 
+		class appdata {
+		public:
+			// app data
+			std::string numUsers;
+			std::string numOnlineUsers;
+			std::string numKeys;
+			std::string version;
+			std::string customerPanelLink;
+		};
+
+		class responsedata {
+		public:
 			// response data
 			std::vector<channel_struct> channeldata;
 			bool success{};
 			std::string message;
 		};
-		data_class data;
+
+		userdata user_data;
+		appdata app_data;
+		responsedata response;
 	private:
 		std::string sessionid, enckey;
 
 		static std::string req(std::string data, std::string url);
+		
 
 		void load_user_data(nlohmann::json data) {
-			api::data.username = data["username"];
-			api::data.ip = data["ip"];
+			api::user_data.username = data["username"];
+			api::user_data.ip = data["ip"];
 			if (data["hwid"].is_null()) {
-				api::data.hwid = "none";
+				api::user_data.hwid = "none";
 			}
 			else {
-				api::data.hwid = data["hwid"];
+				api::user_data.hwid = data["hwid"];
 			}
-			api::data.createdate = data["createdate"];
-			api::data.lastlogin = data["lastlogin"];
+			api::user_data.createdate = data["createdate"];
+			api::user_data.lastlogin = data["lastlogin"];
 
 			for (int i = 0; i < data["subscriptions"].size(); i++) { // Prompto#7895 & stars#2297 was here
 				subscriptions_class subscriptions;
 				subscriptions.name = data["subscriptions"][i]["subscription"];
 				subscriptions.expiry = data["subscriptions"][i]["expiry"];
-				api::data.subscriptions.emplace_back(subscriptions);
+				api::user_data.subscriptions.emplace_back(subscriptions);
 			}
 		}
 
 		void load_app_data(nlohmann::json data) {
-			api::data.numUsers = data["numUsers"];
-			api::data.numOnlineUsers = data["numOnlineUsers"];
-			api::data.numKeys = data["numKeys"];
-			api::data.version = data["version"];
-			api::data.customerPanelLink = data["customerPanelLink"];
+			api::app_data.numUsers = data["numUsers"];
+			api::app_data.numOnlineUsers = data["numOnlineUsers"];
+			api::app_data.numKeys = data["numKeys"];
+			api::app_data.version = data["version"];
+			api::app_data.customerPanelLink = data["customerPanelLink"];
 		}
 
 		void load_response_data(nlohmann::json data) {
-			api::data.success = data["success"];
-			api::data.message = data["message"];
+			api::response.success = data["success"];
+			api::response.message = data["message"];
 		}
 
 		void load_channel_data(nlohmann::json data) {
-			api::data.success = data["success"];
-			api::data.message = data["message"];
+			api::response.success = data["success"];
+			api::response.message = data["message"];
 			for (const auto sub : data["messages"]) {
 
 				std::string authoroutput = sub["author"];
@@ -121,7 +133,7 @@ namespace KeyAuth {
 				messageoutput.erase(remove(messageoutput.begin(), messageoutput.end(), '"'), messageoutput.end());
 				timestampoutput.erase(remove(timestampoutput.begin(), timestampoutput.end(), '"'), timestampoutput.end());
 				channel_struct output = { authoroutput , messageoutput, timestampoutput };
-				api::data.channeldata.push_back(output);
+				api::response.channeldata.push_back(output);
 			}
 		}
 
