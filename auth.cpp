@@ -250,7 +250,7 @@ bool KeyAuth::api::chatsend(std::string message, std::string channel)
     return json[("success")];
 }
 
-void KeyAuth::api::changeusername(std::string newusername)
+void KeyAuth::api::changeUsername(std::string newusername)
 {
     checkInit();
 
@@ -1143,7 +1143,7 @@ std::string KeyAuth::api::fetchonline()
 
     std::string onlineusers;
 
-    int y = atoi(api::data.numOnlineUsers.c_str());
+    int y = atoi(api::app_data.numOnlineUsers.c_str());
     for (int i = 0; i < y; i++)
     {
         onlineusers.append(json[XorStr("users")][i][XorStr("credential")]); onlineusers.append(XorStr("\n"));
@@ -1260,6 +1260,26 @@ std::string KeyAuth::api::req(std::string data, std::string url) {
         error(curl_easy_strerror(code));
 
     debugInfo(data, url, to_return);
+
+    struct curl_certinfo* ci;
+    code = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &ci);
+
+    if (!code) {
+        bool issuer_found = false;
+
+        for (int i = 0; i < ci->num_of_certs; i++) {
+            struct curl_slist* slist;
+
+            for (slist = ci->certinfo[i]; slist; slist = slist->next) {
+                if (std::strstr(slist->data, XorStr("Google Trust Services").c_str()) != NULL || std::strstr(slist->data, XorStr("Let's Encrypt").c_str()) != NULL) {
+                    issuer_found = true;
+                }
+            }
+        }
+
+        if (!issuer_found)
+            error(XorStr("SSL certificate couldn't be verified"));
+    }
 
     return to_return;
 }
