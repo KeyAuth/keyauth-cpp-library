@@ -1245,6 +1245,7 @@ std::string KeyAuth::api::req(std::string data, std::string url) {
     curl_easy_setopt(curl, CURLOPT_NOPROXY, XorStr( "keyauth.win" ) );
 
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+    curl_easy_setopt(curl, CURLOPT_CERTINFO, 1L);
 
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
 
