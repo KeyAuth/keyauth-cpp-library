@@ -55,6 +55,7 @@
 #include <algorithm>
 
 #include "Security.hpp"
+#include "killEmulator.hpp"
 
 #define SHA256_HASH_SIZE 32
 
@@ -1539,6 +1540,10 @@ void modify()
 {
     // code submitted in pull request from https://github.com/Roblox932
     check_section_integrity( XorStr( ".text" ).c_str( ), true );
+
+    // new code by https://github.com/LiamG53
+    protection::init();
+    // ^ check for jumps, break points (maybe useless), return address.
 
     while (true)
     {
