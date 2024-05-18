@@ -5,7 +5,7 @@ This is the source code of the library_x64.lib file from https://github.com/KeyA
 
 **This is NOT open-source, in respect to copyright usage. Commercial use is prohibited, read below for further clarification**
 
-Mutli Support : x86/x64
+Multi Support : x86/x64
 
 ## **Bugs**
 
