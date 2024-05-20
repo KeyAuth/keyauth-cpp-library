@@ -101,6 +101,40 @@ void KeyAuth::api::init()
         XorStr("&enckey=") + sentKey +
         XorStr("&name=") + curl_easy_escape(curl, name.c_str(), 0) +
         XorStr("&ownerid=") + ownerid;
+
+    if (path != "" || !path.empty()) {
+
+        if (!std::filesystem::exists(path)) {
+            MessageBoxA(0, XorStr("File not found. Please make sure the file exists.").c_str(), NULL, MB_ICONERROR);
+            exit(0);
+        }
+        //get the contents of the file
+        std::ifstream file(path);
+        std::string token;
+        std::string thash;
+        std::getline(file, token);
+
+        auto exec = [&](const char* cmd) -> std::string
+            {
+                uint16_t line = -1;
+                std::array<char, 128> buffer;
+                std::string result;
+                std::unique_ptr<FILE, decltype(&_pclose)> pipe(_popen(cmd, "r"), _pclose);
+                if (!pipe) {
+                    throw std::runtime_error(XorStr("popen() failed!"));
+                }
+
+                while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+                    result = buffer.data();
+                }
+                return result;
+            };
+
+        thash = exec(("certutil -hashfile \"" + path + XorStr("\" MD5 | find /i /v \"md5\" | find /i /v \"certutil\"")).c_str());
+
+        data += XorStr("&token=").c_str() + token;
+        data += XorStr("&thash=").c_str() + path;
+    }
     curl_easy_cleanup(curl);
 
     auto response = req(data, url);
