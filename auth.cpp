@@ -216,6 +216,20 @@ void KeyAuth::api::login(std::string username, std::string password)
         load_user_data(json[(XorStr("info"))]);
 }
 
+void KeyAuth::api::logout()
+{
+    checkInit();
+
+    auto data =
+        XorStr("type=logout") +
+        XorStr("&sessionid=") + sessionid +
+        XorStr("&name=") + name +
+        XorStr("&ownerid=") + ownerid;
+    auto response = req(data, url);
+    auto json = response_decoder.parse(response);
+    load_response_data(json);
+}
+
 void KeyAuth::api::chatget(std::string channel)
 {
     checkInit();
