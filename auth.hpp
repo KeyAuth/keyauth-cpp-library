@@ -1,4 +1,4 @@
-#include <includes.hpp>
+﻿#include <includes.hpp>
 
 #pragma comment(lib, "libcurl.lib")
 
@@ -33,6 +33,7 @@ namespace KeyAuth {
 		void button(std::string value);
 		void upgrade(std::string username, std::string key);
 		void login(std::string username, std::string password);
+		void logout();
 		std::vector<unsigned char> download(std::string fileid);
 		void regstr(std::string username, std::string password, std::string key, std::string email = "");
 		void chatget(std::string channel);
@@ -124,6 +125,7 @@ namespace KeyAuth {
 		void load_channel_data(nlohmann::json data) {
 			api::response.success = data["success"];
 			api::response.message = data["message"];
+			api::response.channeldata.clear(); //If you do not delete the data before pushing it, the data will be repeated. TTakaTit
 			for (const auto sub : data["messages"]) {
 
 				std::string authoroutput = sub["author"];
