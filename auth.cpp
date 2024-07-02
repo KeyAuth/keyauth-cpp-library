@@ -1238,6 +1238,37 @@ void KeyAuth::api::forgot(std::string username, std::string email)
     load_response_data(json);
 }
 
+void KeyAuth::api::logout() {
+    checkInit();
+
+    auto data =
+        XorStr("type=logout") +
+        XorStr("&sessionid=") + sessionid +
+        XorStr("&name=") + name +
+        XorStr("&ownerid=") + ownerid;
+    auto response = req(data, url);
+    auto json = response_decoder.parse(response);
+    if (json[(XorStr("success"))]) {
+
+        //clear all old user data from program
+        user_data.createdate.clear();
+        user_data.ip.clear();
+        user_data.hwid.clear();
+        user_data.lastlogin.clear();
+        user_data.username.clear();
+        user_data.subscriptions.clear();
+
+        //clear sessionid
+        sessionid.clear();
+
+        //clear enckey
+        enckey.clear();
+
+    }
+
+    load_response_data(json);
+}
+
 // credits https://stackoverflow.com/a/3790661
 static std::string hexDecode(const std::string& hex)
 {
