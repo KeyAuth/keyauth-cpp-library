@@ -1238,6 +1238,37 @@ void KeyAuth::api::forgot(std::string username, std::string email)
     load_response_data(json);
 }
 
+void KeyAuth::api::logout() {
+    checkInit();
+
+    auto data =
+        XorStr("type=logout") +
+        XorStr("&sessionid=") + sessionid +
+        XorStr("&name=") + name +
+        XorStr("&ownerid=") + ownerid;
+    auto response = req(data, url);
+    auto json = response_decoder.parse(response);
+    if (json[(XorStr("success"))]) {
+
+        //clear all old user data from program
+        user_data.createdate.clear();
+        user_data.ip.clear();
+        user_data.hwid.clear();
+        user_data.lastlogin.clear();
+        user_data.username.clear();
+        user_data.subscriptions.clear();
+
+        //clear sessionid
+        sessionid.clear();
+
+        //clear enckey
+        enckey.clear();
+
+    }
+
+    load_response_data(json);
+}
+
 // credits https://stackoverflow.com/a/3790661
 static std::string hexDecode(const std::string& hex)
 {
@@ -1466,7 +1497,60 @@ std::string getPath() {
     }
 }
 
+void RedactField(nlohmann::json& jsonObject, const std::string& fieldName)
+{
+
+    if (jsonObject.contains(fieldName)) {
+        jsonObject[fieldName] = "REDACTED";
+    }
+}
+
 void debugInfo(std::string data, std::string url, std::string response) {
+
+    //turn response into json
+    nlohmann::json responses = nlohmann::json::parse(response);
+    RedactField(responses, "sessionid");
+    RedactField(responses, "ownerid");
+    RedactField(responses, "app");
+    RedactField(responses, "name");
+    RedactField(responses, "contents");
+    RedactField(responses, "key");
+    RedactField(responses, "username");
+    RedactField(responses, "password");
+    RedactField(responses, "secret");
+    RedactField(responses, "version");
+    RedactField(responses, "fileid");
+    RedactField(responses, "webhooks");
+    std::string redacted_response = responses.dump();
+
+    //turn data into json
+    std::replace(data.begin(), data.end(), '&', ' ');
+
+    nlohmann::json datas;
+
+    std::istringstream iss(data);
+    std::vector<std::string> results((std::istream_iterator<std::string>(iss)),
+        std::istream_iterator<std::string>());
+
+    for (auto const& value : results) {
+        datas[value.substr(0, value.find('='))] = value.substr(value.find('=') + 1);
+    }
+
+    RedactField(datas, "sessionid");
+    RedactField(datas, "ownerid");
+    RedactField(datas, "app");
+    RedactField(datas, "name");
+    RedactField(datas, "key");
+    RedactField(datas, "username");
+    RedactField(datas, "password");
+    RedactField(datas, "contents");
+    RedactField(datas, "secret");
+    RedactField(datas, "version");
+    RedactField(datas, "fileid");
+    RedactField(datas, "webhooks");
+
+    std::string redacted_data = datas.dump();
+
 
     //gets the path
     std::string path = getPath();
@@ -1485,7 +1569,7 @@ void debugInfo(std::string data, std::string url, std::string response) {
     ///////////////////////
 
     //creates variables for the paths needed :smile:
-    std::string KeyAuthPath = path + "\\KeyAuth"; 
+    std::string KeyAuthPath = path + "\\KeyAuth";
     std::string logPath = KeyAuthPath + "\\Debug\\" + filenameOnly.substr(0, filenameOnly.size() - 4);
 
     //basically loops until we have all the paths
@@ -1530,7 +1614,7 @@ void debugInfo(std::string data, std::string url, std::string response) {
 
     std::string currentTimeString = std::to_string(hours) + ":" + formattedMinutes + " " + period;
 
-    std::string contents = "\n\n@ " + currentTimeString + "\nData sent : " + data + "\nResponse : " + response + "Sent to: " + url;
+    std::string contents = "\n\n@ " + currentTimeString + "\nData sent : " + redacted_data + "\nResponse : " + redacted_response + "Sent to: " + url;
 
     logfile << contents;
 
