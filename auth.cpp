@@ -821,7 +821,6 @@ void KeyAuth::api::upgrade(std::string username, std::string key) {
         error("Signature checksum failed. Request was tampered with or session ended most likely. & echo: & echo Message: " + message);
     }
 
-    json[(XorStr("success"))] = false;
     load_response_data(json);
 }
 
