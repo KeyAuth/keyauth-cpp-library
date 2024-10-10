@@ -75,7 +75,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>.\nlohmann;.\curl;.\;$(IncludePath)</IncludePath>
+    <IncludePath>.\libsodium;.\nlohmann;.\curl;.\;$(IncludePath)</IncludePath>
     <TargetName>$(ProjectName)_x86</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -83,7 +83,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>.\nlohmann;.\curl;.\;$(IncludePath)</IncludePath>
+    <IncludePath>.\libsodium;.\nlohmann;.\curl;.\;$(IncludePath)</IncludePath>
     <TargetName>$(ProjectName)_x64</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -142,13 +142,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>CURL_STATICLIB;_CRT_SECURE_NO_WARNINGS;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SODIUM_STATIC;CURL_STATICLIB;_CRT_SECURE_NO_WARNINGS;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <DebugInformationFormat>None</DebugInformationFormat>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -159,15 +160,85 @@
     </Link>
     <Lib>
       <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalDependencies>libsodium.lib;libcurl.lib%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\curl;.\libsodium;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/NODEFAULTLIB:libcurl.lib %(AdditionalOptions)</AdditionalOptions>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="auth.cpp" />
-    <ClCompile Include="hmac_sha256.c" />
-    <ClCompile Include="sha256.c" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\lazy_importer.hpp" />
+    <ClInclude Include="killEmulator.hpp" />
+    <ClInclude Include="libsodium\include\sodium.h" />
+    <ClInclude Include="libsodium\sodium\core.h" />
+    <ClInclude Include="libsodium\sodium\crypto_aead_aegis128l.h" />
+    <ClInclude Include="libsodium\sodium\crypto_aead_aegis256.h" />
+    <ClInclude Include="libsodium\sodium\crypto_aead_aes256gcm.h" />
+    <ClInclude Include="libsodium\sodium\crypto_aead_chacha20poly1305.h" />
+    <ClInclude Include="libsodium\sodium\crypto_aead_xchacha20poly1305.h" />
+    <ClInclude Include="libsodium\sodium\crypto_auth.h" />
+    <ClInclude Include="libsodium\sodium\crypto_auth_hmacsha256.h" />
+    <ClInclude Include="libsodium\sodium\crypto_auth_hmacsha512.h" />
+    <ClInclude Include="libsodium\sodium\crypto_auth_hmacsha512256.h" />
+    <ClInclude Include="libsodium\sodium\crypto_box.h" />
+    <ClInclude Include="libsodium\sodium\crypto_box_curve25519xchacha20poly1305.h" />
+    <ClInclude Include="libsodium\sodium\crypto_box_curve25519xsalsa20poly1305.h" />
+    <ClInclude Include="libsodium\sodium\crypto_core_ed25519.h" />
+    <ClInclude Include="libsodium\sodium\crypto_core_hchacha20.h" />
+    <ClInclude Include="libsodium\sodium\crypto_core_hsalsa20.h" />
+    <ClInclude Include="libsodium\sodium\crypto_core_ristretto255.h" />
+    <ClInclude Include="libsodium\sodium\crypto_core_salsa20.h" />
+    <ClInclude Include="libsodium\sodium\crypto_core_salsa2012.h" />
+    <ClInclude Include="libsodium\sodium\crypto_core_salsa208.h" />
+    <ClInclude Include="libsodium\sodium\crypto_generichash.h" />
+    <ClInclude Include="libsodium\sodium\crypto_generichash_blake2b.h" />
+    <ClInclude Include="libsodium\sodium\crypto_hash.h" />
+    <ClInclude Include="libsodium\sodium\crypto_hash_sha256.h" />
+    <ClInclude Include="libsodium\sodium\crypto_hash_sha512.h" />
+    <ClInclude Include="libsodium\sodium\crypto_kdf.h" />
+    <ClInclude Include="libsodium\sodium\crypto_kdf_blake2b.h" />
+    <ClInclude Include="libsodium\sodium\crypto_kdf_hkdf_sha256.h" />
+    <ClInclude Include="libsodium\sodium\crypto_kdf_hkdf_sha512.h" />
+    <ClInclude Include="libsodium\sodium\crypto_kx.h" />
+    <ClInclude Include="libsodium\sodium\crypto_onetimeauth.h" />
+    <ClInclude Include="libsodium\sodium\crypto_onetimeauth_poly1305.h" />
+    <ClInclude Include="libsodium\sodium\crypto_pwhash.h" />
+    <ClInclude Include="libsodium\sodium\crypto_pwhash_argon2i.h" />
+    <ClInclude Include="libsodium\sodium\crypto_pwhash_argon2id.h" />
+    <ClInclude Include="libsodium\sodium\crypto_pwhash_scryptsalsa208sha256.h" />
+    <ClInclude Include="libsodium\sodium\crypto_scalarmult.h" />
+    <ClInclude Include="libsodium\sodium\crypto_scalarmult_curve25519.h" />
+    <ClInclude Include="libsodium\sodium\crypto_scalarmult_ed25519.h" />
+    <ClInclude Include="libsodium\sodium\crypto_scalarmult_ristretto255.h" />
+    <ClInclude Include="libsodium\sodium\crypto_secretbox.h" />
+    <ClInclude Include="libsodium\sodium\crypto_secretbox_xchacha20poly1305.h" />
+    <ClInclude Include="libsodium\sodium\crypto_secretbox_xsalsa20poly1305.h" />
+    <ClInclude Include="libsodium\sodium\crypto_secretstream_xchacha20poly1305.h" />
+    <ClInclude Include="libsodium\sodium\crypto_shorthash.h" />
+    <ClInclude Include="libsodium\sodium\crypto_shorthash_siphash24.h" />
+    <ClInclude Include="libsodium\sodium\crypto_sign.h" />
+    <ClInclude Include="libsodium\sodium\crypto_sign_ed25519.h" />
+    <ClInclude Include="libsodium\sodium\crypto_sign_edwards25519sha512batch.h" />
+    <ClInclude Include="libsodium\sodium\crypto_stream.h" />
+    <ClInclude Include="libsodium\sodium\crypto_stream_chacha20.h" />
+    <ClInclude Include="libsodium\sodium\crypto_stream_salsa20.h" />
+    <ClInclude Include="libsodium\sodium\crypto_stream_salsa2012.h" />
+    <ClInclude Include="libsodium\sodium\crypto_stream_salsa208.h" />
+    <ClInclude Include="libsodium\sodium\crypto_stream_xchacha20.h" />
+    <ClInclude Include="libsodium\sodium\crypto_stream_xsalsa20.h" />
+    <ClInclude Include="libsodium\sodium\crypto_verify_16.h" />
+    <ClInclude Include="libsodium\sodium\crypto_verify_32.h" />
+    <ClInclude Include="libsodium\sodium\crypto_verify_64.h" />
+    <ClInclude Include="libsodium\sodium\export.h" />
+    <ClInclude Include="libsodium\sodium\randombytes.h" />
+    <ClInclude Include="libsodium\sodium\randombytes_internal_random.h" />
+    <ClInclude Include="libsodium\sodium\randombytes_sysrandom.h" />
+    <ClInclude Include="libsodium\sodium\runtime.h" />
+    <ClInclude Include="libsodium\sodium\utils.h" />
+    <ClInclude Include="libsodium\sodium\version.h" />
     <ClInclude Include="auth.hpp" />
     <ClInclude Include="curl\curl.h" />
     <ClInclude Include="curl\curlver.h" />
@@ -178,7 +249,6 @@
     <ClInclude Include="curl\system.h" />
     <ClInclude Include="curl\typecheck-gcc.h" />
     <ClInclude Include="curl\urlapi.h" />
-    <ClInclude Include="hmac_sha256.h" />
     <ClInclude Include="includes.hpp" />
     <ClInclude Include="nlohmann\adl_serializer.hpp" />
     <ClInclude Include="nlohmann\byte_container_with_subtype.hpp" />
@@ -218,12 +288,13 @@
     <ClInclude Include="nlohmann\thirdparty\hedley\hedley.hpp" />
     <ClInclude Include="nlohmann\thirdparty\hedley\hedley_undef.hpp" />
     <ClInclude Include="Security.hpp" />
-    <ClInclude Include="sha256.h" />
     <ClInclude Include="utils.hpp" />
     <ClInclude Include="xorstr.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="curl\libcurl.lib" />
+    <Library Include="libsodium\libsodium.lib" />
+    <Library Include="curl\zlib.lib" />
   </ItemGroup>
   <ItemGroup>
     <None Include="curl\Makefile.am" />
