@@ -1485,8 +1485,8 @@ int VerifyPayload(std::string signature, std::string timestamp, std::string body
         current_time.time_since_epoch()).count();
 
     // Step 3: Compare the timestamps
-    if (current_unix_time - unix_timestamp > 15) {
-        // std::cout << "The timestamp is older than 15 seconds." << std::endl;
+    if (current_unix_time - unix_timestamp > 20) {
+        // std::cout << "The timestamp is older than 20 seconds." << std::endl;
         LI_FN(exit)(3);
     }
 
@@ -1559,12 +1559,12 @@ std::string KeyAuth::api::req(std::string data, std::string url) {
 
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
-    // curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
-    // 
-    // curl_easy_setopt(curl, CURLOPT_NOPROXY, XorStr( "keyauth.win" ) );
-    // 
-    // curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-    // curl_easy_setopt(curl, CURLOPT_CERTINFO, 1L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
+    
+    curl_easy_setopt(curl, CURLOPT_NOPROXY, XorStr( "keyauth.win" ) );
+    
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+    curl_easy_setopt(curl, CURLOPT_CERTINFO, 1L);
 
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
 
