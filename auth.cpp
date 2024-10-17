@@ -1163,7 +1163,7 @@ bool KeyAuth::api::checkblack() {
     }
 }
 
-void KeyAuth::api::check() {
+void KeyAuth::api::check(bool check_paid) {
     checkInit();
 
     auto data =
@@ -1172,7 +1172,12 @@ void KeyAuth::api::check() {
         XorStr("&name=") + name +
         XorStr("&ownerid=") + ownerid;
 
-    auto response = req(data, url);
+    std::string endpoint = url;
+    if (check_paid) {
+        endpoint += "?check_paid=1";
+    }
+
+    auto response = req(data, endpoint);
 
     std::hash<int> hasher;
     int expectedHash = hasher(42);
@@ -1197,7 +1202,9 @@ void KeyAuth::api::check() {
             LI_FN(exit)(9);
         }
     }
-    LI_FN(exit)(7);
+    else {
+        LI_FN(exit)(7);
+    }
 }
 
 std::string KeyAuth::api::var(std::string varid) {
@@ -1509,7 +1516,7 @@ int VerifyPayload(std::string signature, std::string timestamp, std::string body
     {
         // std::cerr << "Invalid public key format" << std::endl;
         LI_FN(exit)(6);
-    }
+    };
 
     if (crypto_sign_ed25519_verify_detached(sig, reinterpret_cast<const unsigned char*>(message.c_str()), message.length(), pk) != 0)
     {
@@ -1517,7 +1524,7 @@ int VerifyPayload(std::string signature, std::string timestamp, std::string body
         LI_FN(exit)(7);
     }
 
-    // std::cout << "Payload verfied" << std::endl;
+    // std::cout << "\n Payload verfied" << std::endl;
     
     int value = 42 ^ 0xA5A5;
     return value & 0xFFFF;

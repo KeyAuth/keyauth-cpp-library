@@ -21,7 +21,7 @@ namespace KeyAuth {
 
 		void ban(std::string reason = "");
 		void init();
-		void check();
+		void check(bool check_paid = false);
 		void log(std::string msg);
 		void license(std::string key);
 		std::string var(std::string varid);
@@ -76,8 +76,9 @@ namespace KeyAuth {
 		public:
 			// response data
 			std::vector<channel_struct> channeldata;
-			bool success{false};
+			bool success{};
 			std::string message;
+			bool isPaid{};
 		};
 
 		userdata user_data;
@@ -120,6 +121,10 @@ namespace KeyAuth {
 		void load_response_data(nlohmann::json data) {
 			api::response.success = data[XorStr("success")];
 			api::response.message = data["message"];
+
+			if (data.contains(XorStr("role").c_str()) && data[XorStr("role")] != XorStr("tester").c_str() && data[XorStr("role")] != XorStr("not_checked").c_str()) {
+				api::response.isPaid = true;
+			}
 		}
 
 		void load_channel_data(nlohmann::json data) {
