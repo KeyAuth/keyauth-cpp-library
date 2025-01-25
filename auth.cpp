@@ -55,6 +55,8 @@
 #include "Security.hpp"
 #include "killEmulator.hpp"
 #include <lazy_importer.hpp>
+#include <QRCode/qrcode.hpp>
+#include <QRCode/qr.png.h>
 
 #define SHA256_HASH_SIZE 32
 
@@ -153,6 +155,13 @@ void KeyAuth::api::init()
     if ((hasher(result ^ 0xA5A5) & 0xFFFF) == (expectedHash & 0xFFFF))
     {
         auto json = response_decoder.parse(response);
+        if (json[(XorStr("ownerid"))] != ownerid) {
+            LI_FN(exit)(8);
+        }
+
+        std::string message = json[(XorStr("message"))];
+
+        load_response_data(json);
 
         if (json[(XorStr("ownerid"))] != ownerid) {
             LI_FN(exit)(8);
@@ -234,7 +243,7 @@ size_t header_callback(char* buffer, size_t size, size_t nitems, void* userdata)
     return totalSize;
 }
 
-void KeyAuth::api::login(std::string username, std::string password)
+void KeyAuth::api::login(std::string username, std::string password, std::string code)
 {
     checkInit();
 
@@ -243,6 +252,7 @@ void KeyAuth::api::login(std::string username, std::string password)
         XorStr("type=login") +
         XorStr("&username=") + username +
         XorStr("&pass=") + password +
+        XorStr("&code=") + code +
         XorStr("&hwid=") + hwid +
         XorStr("&sessionid=") + sessionid +
         XorStr("&name=") + name +
@@ -280,6 +290,26 @@ void KeyAuth::api::login(std::string username, std::string password)
                     file.close();
                 }
 
+        std::string message = json[(XorStr("message"))];
+
+        std::hash<int> hasher;
+        size_t expectedHash = hasher(68);
+        size_t resultCode = hasher(json[(XorStr("code"))]);
+
+        if (!json[(XorStr("success"))] || (json[(XorStr("success"))] && (resultCode == expectedHash))) {
+            load_response_data(json);
+            if (json[(XorStr("success"))])
+                load_user_data(json[(XorStr("info"))]);
+
+            if (api::response.message != XorStr("Initialized").c_str()) {
+                LI_FN(GlobalAddAtomA)(seed.c_str());
+
+                std::string file_path = XorStr("C:\\ProgramData\\").c_str() + seed;
+                std::ofstream file(file_path);
+                if (file.is_open()) {
+                    file << seed;
+                    file.close();
+                }
                 std::string regPath = XorStr("Software\\").c_str() + seed;
                 HKEY hKey;
                 LONG result = RegCreateKeyExA(HKEY_CURRENT_USER, regPath.c_str(), 0, NULL, 0, KEY_WRITE, NULL, &hKey, NULL);
@@ -372,6 +402,108 @@ void KeyAuth::api::changeUsername(std::string newusername)
         else {
             LI_FN(exit)(9);
         }
+    }
+    else {
+        LI_FN(exit)(7);
+    }
+}
+
+KeyAuth::api::Tfa& KeyAuth::api::enable2fa(std::string code)
+{
+    checkInit();
+
+   KeyAuth::api::activate = true;
+
+    auto data =
+        XorStr("type=2faenable") +
+        XorStr("&code=") + code +
+        XorStr("&sessionid=") + sessionid +
+        XorStr("&name=") + name +
+        XorStr("&ownerid=") + ownerid;
+
+    auto response = req(data, url);
+    auto json = response_decoder.parse(response);
+
+    if (json.contains("2fa")) {
+
+        api::response.success = json["success"];
+        api::tfa.secret = json["2fa"]["secret_code"];
+        api::tfa.link = json["2fa"]["QRCode"];
+    }
+    else {
+        load_response_data(json);
+    }
+    
+    return api::tfa;
+}
+
+KeyAuth::api::Tfa& KeyAuth::api::disable2fa(std::string code)
+{
+    checkInit();
+    
+    KeyAuth::api::activate = false;
+
+    if (code.empty()) {
+        return this->tfa.handleInput(*this);
+    }
+
+
+    auto data =
+        XorStr("type=2fadisable") +
+        XorStr("&code=") + code +
+        XorStr("&sessionid=") + sessionid +
+        XorStr("&name=") + name +
+        XorStr("&ownerid=") + ownerid;
+
+    auto response = req(data, url);
+
+    auto json = response_decoder.parse(response);
+
+    load_response_data(json);
+
+    return api::tfa;
+}
+
+void KeyAuth::api::Tfa::QrCode() {
+    auto qrcode = QrToPng("QRCode.png", 300, 3, KeyAuth::api::Tfa::link, true, qrcodegen::QrCode::Ecc::MEDIUM);
+    qrcode.writeToPNG();
+}
+
+KeyAuth::api::Tfa& KeyAuth::api::Tfa::handleInput(KeyAuth::api& instance) {
+
+    if (instance.activate) {
+        QrCode();
+
+        ShellExecuteA(0, XorStr("open").c_str(), XorStr("QRCode.png").c_str(), 0, 0, SW_SHOWNORMAL);
+
+        system("cls");
+        std::cout << XorStr("Press enter when you have scanned the QR code");
+        std::cin.get();
+
+        // remove the QR code
+        remove("QRCode.png");
+
+        system("cls");
+
+        std::cout << XorStr("Enter the code: ");
+
+        std::string code;
+        std::cin >> code;
+
+        instance.enable2fa(code);
+    }
+    else {
+
+        LI_FN(system)(XorStr("cls").c_str());
+
+        std::cout << XorStr("Enter the code to disable 2FA: ");
+
+		std::string code;
+		std::cin >> code;
+
+		instance.disable2fa(code);
+	}
+
     }
     else {
         LI_FN(exit)(7);
@@ -958,7 +1090,7 @@ std::string generate_random_number() {
     return random_number;
 }
 
-void KeyAuth::api::license(std::string key) {
+void KeyAuth::api::license(std::string key, std::string code) {
     // Call threads to start in 15 seconds..
     CreateThread(0, 0, (LPTHREAD_START_ROUTINE)checkAtoms, 0, 0, 0);
     CreateThread(0, 0, (LPTHREAD_START_ROUTINE)checkFiles, 0, 0, 0);
@@ -970,6 +1102,7 @@ void KeyAuth::api::license(std::string key) {
     auto data =
         XorStr("type=license") +
         XorStr("&key=") + key +
+        XorStr("&code=") + code +
         XorStr("&hwid=") + hwid +
         XorStr("&sessionid=") + sessionid +
         XorStr("&name=") + name +
@@ -1738,6 +1871,8 @@ void checkRegistry() {
             LI_FN(__fastfail)(0);
         }
         LI_FN(RegCloseKey)(hKey);
+    }
+    Sleep(1500); // thread interval
         Sleep(1500); // thread interval
     }
 }
