@@ -313,4 +313,309 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{03a87d79-b6bb-4199-bd0c-97158912f6ab}</ProjectGuid>
+    <RootNamespace>library</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>.\libsodium;.\nlohmann;.\curl;.\;$(IncludePath)</IncludePath>
+    <TargetName>$(ProjectName)_x86</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>.\libsodium;.\nlohmann;.\curl;.\;$(IncludePath)</IncludePath>
+    <TargetName>$(ProjectName)_x64</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>CURL_STATICLIB;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>SODIUM_STATIC;CURL_STATICLIB;_CRT_SECURE_NO_WARNINGS;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>
+      </SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <TargetMachine>MachineX64</TargetMachine>
+      <AdditionalDependencies>libsodium.lib;libcurl.lib%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\curl;.\libsodium;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/NODEFAULTLIB:libcurl.lib %(AdditionalOptions)</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="auth.cpp" />
+    <ClCompile Include="utils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\lazy_importer.hpp" />
+    <ClInclude Include="killEmulator.hpp" />
+    <ClInclude Include="libsodium\include\sodium.h" />
+    <ClInclude Include="libsodium\sodium\core.h" />
+    <ClInclude Include="libsodium\sodium\crypto_aead_aegis128l.h" />
+    <ClInclude Include="libsodium\sodium\crypto_aead_aegis256.h" />
+    <ClInclude Include="libsodium\sodium\crypto_aead_aes256gcm.h" />
+    <ClInclude Include="libsodium\sodium\crypto_aead_chacha20poly1305.h" />
+    <ClInclude Include="libsodium\sodium\crypto_aead_xchacha20poly1305.h" />
+    <ClInclude Include="libsodium\sodium\crypto_auth.h" />
+    <ClInclude Include="libsodium\sodium\crypto_auth_hmacsha256.h" />
+    <ClInclude Include="libsodium\sodium\crypto_auth_hmacsha512.h" />
+    <ClInclude Include="libsodium\sodium\crypto_auth_hmacsha512256.h" />
+    <ClInclude Include="libsodium\sodium\crypto_box.h" />
+    <ClInclude Include="libsodium\sodium\crypto_box_curve25519xchacha20poly1305.h" />
+    <ClInclude Include="libsodium\sodium\crypto_box_curve25519xsalsa20poly1305.h" />
+    <ClInclude Include="libsodium\sodium\crypto_core_ed25519.h" />
+    <ClInclude Include="libsodium\sodium\crypto_core_hchacha20.h" />
+    <ClInclude Include="libsodium\sodium\crypto_core_hsalsa20.h" />
+    <ClInclude Include="libsodium\sodium\crypto_core_ristretto255.h" />
+    <ClInclude Include="libsodium\sodium\crypto_core_salsa20.h" />
+    <ClInclude Include="libsodium\sodium\crypto_core_salsa2012.h" />
+    <ClInclude Include="libsodium\sodium\crypto_core_salsa208.h" />
+    <ClInclude Include="libsodium\sodium\crypto_generichash.h" />
+    <ClInclude Include="libsodium\sodium\crypto_generichash_blake2b.h" />
+    <ClInclude Include="libsodium\sodium\crypto_hash.h" />
+    <ClInclude Include="libsodium\sodium\crypto_hash_sha256.h" />
+    <ClInclude Include="libsodium\sodium\crypto_hash_sha512.h" />
+    <ClInclude Include="libsodium\sodium\crypto_kdf.h" />
+    <ClInclude Include="libsodium\sodium\crypto_kdf_blake2b.h" />
+    <ClInclude Include="libsodium\sodium\crypto_kdf_hkdf_sha256.h" />
+    <ClInclude Include="libsodium\sodium\crypto_kdf_hkdf_sha512.h" />
+    <ClInclude Include="libsodium\sodium\crypto_kx.h" />
+    <ClInclude Include="libsodium\sodium\crypto_onetimeauth.h" />
+    <ClInclude Include="libsodium\sodium\crypto_onetimeauth_poly1305.h" />
+    <ClInclude Include="libsodium\sodium\crypto_pwhash.h" />
+    <ClInclude Include="libsodium\sodium\crypto_pwhash_argon2i.h" />
+    <ClInclude Include="libsodium\sodium\crypto_pwhash_argon2id.h" />
+    <ClInclude Include="libsodium\sodium\crypto_pwhash_scryptsalsa208sha256.h" />
+    <ClInclude Include="libsodium\sodium\crypto_scalarmult.h" />
+    <ClInclude Include="libsodium\sodium\crypto_scalarmult_curve25519.h" />
+    <ClInclude Include="libsodium\sodium\crypto_scalarmult_ed25519.h" />
+    <ClInclude Include="libsodium\sodium\crypto_scalarmult_ristretto255.h" />
+    <ClInclude Include="libsodium\sodium\crypto_secretbox.h" />
+    <ClInclude Include="libsodium\sodium\crypto_secretbox_xchacha20poly1305.h" />
+    <ClInclude Include="libsodium\sodium\crypto_secretbox_xsalsa20poly1305.h" />
+    <ClInclude Include="libsodium\sodium\crypto_secretstream_xchacha20poly1305.h" />
+    <ClInclude Include="libsodium\sodium\crypto_shorthash.h" />
+    <ClInclude Include="libsodium\sodium\crypto_shorthash_siphash24.h" />
+    <ClInclude Include="libsodium\sodium\crypto_sign.h" />
+    <ClInclude Include="libsodium\sodium\crypto_sign_ed25519.h" />
+    <ClInclude Include="libsodium\sodium\crypto_sign_edwards25519sha512batch.h" />
+    <ClInclude Include="libsodium\sodium\crypto_stream.h" />
+    <ClInclude Include="libsodium\sodium\crypto_stream_chacha20.h" />
+    <ClInclude Include="libsodium\sodium\crypto_stream_salsa20.h" />
+    <ClInclude Include="libsodium\sodium\crypto_stream_salsa2012.h" />
+    <ClInclude Include="libsodium\sodium\crypto_stream_salsa208.h" />
+    <ClInclude Include="libsodium\sodium\crypto_stream_xchacha20.h" />
+    <ClInclude Include="libsodium\sodium\crypto_stream_xsalsa20.h" />
+    <ClInclude Include="libsodium\sodium\crypto_verify_16.h" />
+    <ClInclude Include="libsodium\sodium\crypto_verify_32.h" />
+    <ClInclude Include="libsodium\sodium\crypto_verify_64.h" />
+    <ClInclude Include="libsodium\sodium\export.h" />
+    <ClInclude Include="libsodium\sodium\randombytes.h" />
+    <ClInclude Include="libsodium\sodium\randombytes_internal_random.h" />
+    <ClInclude Include="libsodium\sodium\randombytes_sysrandom.h" />
+    <ClInclude Include="libsodium\sodium\runtime.h" />
+    <ClInclude Include="libsodium\sodium\utils.h" />
+    <ClInclude Include="libsodium\sodium\version.h" />
+    <ClInclude Include="auth.hpp" />
+    <ClInclude Include="curl\curl.h" />
+    <ClInclude Include="curl\curlver.h" />
+    <ClInclude Include="curl\easy.h" />
+    <ClInclude Include="curl\mprintf.h" />
+    <ClInclude Include="curl\multi.h" />
+    <ClInclude Include="curl\stdcheaders.h" />
+    <ClInclude Include="curl\system.h" />
+    <ClInclude Include="curl\typecheck-gcc.h" />
+    <ClInclude Include="curl\urlapi.h" />
+    <ClInclude Include="includes.hpp" />
+    <ClInclude Include="nlohmann\adl_serializer.hpp" />
+    <ClInclude Include="nlohmann\byte_container_with_subtype.hpp" />
+    <ClInclude Include="nlohmann\detail\conversions\from_json.hpp" />
+    <ClInclude Include="nlohmann\detail\conversions\to_chars.hpp" />
+    <ClInclude Include="nlohmann\detail\conversions\to_json.hpp" />
+    <ClInclude Include="nlohmann\detail\exceptions.hpp" />
+    <ClInclude Include="nlohmann\detail\hash.hpp" />
+    <ClInclude Include="nlohmann\detail\input\binary_reader.hpp" />
+    <ClInclude Include="nlohmann\detail\input\input_adapters.hpp" />
+    <ClInclude Include="nlohmann\detail\input\json_sax.hpp" />
+    <ClInclude Include="nlohmann\detail\input\lexer.hpp" />
+    <ClInclude Include="nlohmann\detail\input\parser.hpp" />
+    <ClInclude Include="nlohmann\detail\input\position_t.hpp" />
+    <ClInclude Include="nlohmann\detail\iterators\internal_iterator.hpp" />
+    <ClInclude Include="nlohmann\detail\iterators\iteration_proxy.hpp" />
+    <ClInclude Include="nlohmann\detail\iterators\iterator_traits.hpp" />
+    <ClInclude Include="nlohmann\detail\iterators\iter_impl.hpp" />
+    <ClInclude Include="nlohmann\detail\iterators\json_reverse_iterator.hpp" />
+    <ClInclude Include="nlohmann\detail\iterators\primitive_iterator.hpp" />
+    <ClInclude Include="nlohmann\detail\json_pointer.hpp" />
+    <ClInclude Include="nlohmann\detail\json_ref.hpp" />
+    <ClInclude Include="nlohmann\detail\macro_scope.hpp" />
+    <ClInclude Include="nlohmann\detail\macro_unscope.hpp" />
+    <ClInclude Include="nlohmann\detail\meta\cpp_future.hpp" />
+    <ClInclude Include="nlohmann\detail\meta\detected.hpp" />
+    <ClInclude Include="nlohmann\detail\meta\is_sax.hpp" />
+    <ClInclude Include="nlohmann\detail\meta\type_traits.hpp" />
+    <ClInclude Include="nlohmann\detail\meta\void_t.hpp" />
+    <ClInclude Include="nlohmann\detail\output\binary_writer.hpp" />
+    <ClInclude Include="nlohmann\detail\output\output_adapters.hpp" />
+    <ClInclude Include="nlohmann\detail\output\serializer.hpp" />
+    <ClInclude Include="nlohmann\detail\value_t.hpp" />
+    <ClInclude Include="nlohmann\json.hpp" />
+    <ClInclude Include="nlohmann\json_fwd.hpp" />
+    <ClInclude Include="nlohmann\ordered_map.hpp" />
+    <ClInclude Include="nlohmann\thirdparty\hedley\hedley.hpp" />
+    <ClInclude Include="nlohmann\thirdparty\hedley\hedley_undef.hpp" />
+    <ClInclude Include="Security.hpp" />
+    <ClInclude Include="utils.hpp" />
+    <ClInclude Include="xorstr.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="curl\libcurl.lib" />
+    <Library Include="libsodium\libsodium.lib" />
+    <Library Include="curl\zlib.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="curl\Makefile.am" />
+    <None Include="curl\Makefile.in" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
 </Project>

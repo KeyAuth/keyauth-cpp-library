@@ -1,3 +1,4 @@
+
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
@@ -429,6 +430,421 @@
     </Library>
     <Library Include="libsodium\libsodium.lib" />
     <Library Include="curl\zlib.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="curl\Makefile.am">
+      <Filter>Header Files\curl</Filter>
+    </None>
+    <None Include="curl\Makefile.in">
+      <Filter>Header Files\curl</Filter>
+    </None>
+  </ItemGroup>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\curl">
+      <UniqueIdentifier>{864c9f28-b529-408a-93b0-9c8423c793e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\nlohmann">
+      <UniqueIdentifier>{0c5bac00-2508-41c7-add9-a53839eceb90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\libsodium">
+      <UniqueIdentifier>{6ef545b7-b1cb-4adf-a67a-47abb93bd56d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="auth.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hmac_sha256.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sha256.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="includes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="curl\mprintf.h">
+      <Filter>Header Files\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="curl\multi.h">
+      <Filter>Header Files\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="curl\stdcheaders.h">
+      <Filter>Header Files\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="curl\system.h">
+      <Filter>Header Files\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="curl\typecheck-gcc.h">
+      <Filter>Header Files\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="curl\urlapi.h">
+      <Filter>Header Files\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="curl\curl.h">
+      <Filter>Header Files\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="curl\curlver.h">
+      <Filter>Header Files\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="curl\easy.h">
+      <Filter>Header Files\curl</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\json_fwd.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\ordered_map.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\conversions\from_json.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\conversions\to_chars.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\conversions\to_json.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\exceptions.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\hash.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\input\binary_reader.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\input\input_adapters.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\input\json_sax.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\input\lexer.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\input\parser.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\input\position_t.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\iterators\internal_iterator.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\iterators\iteration_proxy.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\iterators\iterator_traits.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\iterators\iter_impl.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\iterators\json_reverse_iterator.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\iterators\primitive_iterator.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\json_pointer.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\json_ref.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\macro_scope.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\macro_unscope.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\meta\cpp_future.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\meta\detected.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\meta\is_sax.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\meta\type_traits.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\meta\void_t.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\output\binary_writer.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\output\output_adapters.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\output\serializer.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\detail\value_t.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\thirdparty\hedley\hedley.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\thirdparty\hedley\hedley_undef.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\adl_serializer.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\byte_container_with_subtype.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="nlohmann\json.hpp">
+      <Filter>Header Files\nlohmann</Filter>
+    </ClInclude>
+    <ClInclude Include="auth.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="xorstr.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hmac_sha256.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sha256.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Security.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\core.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_aead_aegis128l.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_aead_aegis256.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_aead_aes256gcm.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_aead_chacha20poly1305.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_aead_xchacha20poly1305.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_auth.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_auth_hmacsha256.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_auth_hmacsha512.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_auth_hmacsha512256.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_box.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_box_curve25519xchacha20poly1305.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_box_curve25519xsalsa20poly1305.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_core_ed25519.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_core_hchacha20.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_core_hsalsa20.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_core_ristretto255.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_core_salsa20.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_core_salsa208.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_core_salsa2012.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_generichash.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_generichash_blake2b.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_hash.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_hash_sha256.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_hash_sha512.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_kdf.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_kdf_blake2b.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_kdf_hkdf_sha256.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_kdf_hkdf_sha512.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_kx.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_onetimeauth.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_onetimeauth_poly1305.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_pwhash.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_pwhash_argon2i.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_pwhash_argon2id.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_pwhash_scryptsalsa208sha256.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_scalarmult.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_scalarmult_curve25519.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_scalarmult_ed25519.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_scalarmult_ristretto255.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_secretbox.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_secretbox_xchacha20poly1305.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_secretbox_xsalsa20poly1305.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_secretstream_xchacha20poly1305.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_shorthash.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_shorthash_siphash24.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_sign.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_sign_ed25519.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_sign_edwards25519sha512batch.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_stream.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_stream_chacha20.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_stream_salsa20.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_stream_salsa208.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_stream_salsa2012.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_stream_xchacha20.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_stream_xsalsa20.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_verify_16.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_verify_32.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\crypto_verify_64.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\export.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\randombytes.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\randombytes_internal_random.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\randombytes_sysrandom.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\runtime.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\utils.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium\version.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libsodium-1.0.20-msvc\libsodium\include\sodium.h">
+      <Filter>Header Files\libsodium</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="curl\libcurl.lib">
+      <Filter>Header Files\curl</Filter>
+    </Library>
+    <Library Include="..\..\libsodium-1.0.20-msvc\libsodium\x64\Release\v143\static\libsodium.lib" />
   </ItemGroup>
   <ItemGroup>
     <None Include="curl\Makefile.am">
