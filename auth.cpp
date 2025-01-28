@@ -155,13 +155,6 @@ void KeyAuth::api::init()
     if ((hasher(result ^ 0xA5A5) & 0xFFFF) == (expectedHash & 0xFFFF))
     {
         auto json = response_decoder.parse(response);
-        if (json[(XorStr("ownerid"))] != ownerid) {
-            LI_FN(exit)(8);
-        }
-
-        std::string message = json[(XorStr("message"))];
-
-        load_response_data(json);
 
         if (json[(XorStr("ownerid"))] != ownerid) {
             LI_FN(exit)(8);
@@ -188,6 +181,7 @@ void KeyAuth::api::init()
             else if (json[(XorStr("message"))] == XorStr("invalidver"))
             {
                 std::string dl = json[(XorStr("download"))];
+                api::app_data.downloadLink = json[XorStr("download")];
                 if (dl == "")
                 {
                     MessageBoxA(0, XorStr("Version in the loader does match the one on the dashboard, and the download link on dashboard is blank.\n\nTo fix this, either fix the loader so it matches the version on the dashboard. Or if you intended for it to have different versions, update the download link on dashboard so it will auto-update correctly.").c_str(), NULL, MB_ICONERROR);
@@ -290,26 +284,6 @@ void KeyAuth::api::login(std::string username, std::string password, std::string
                     file.close();
                 }
 
-        std::string message = json[(XorStr("message"))];
-
-        std::hash<int> hasher;
-        size_t expectedHash = hasher(68);
-        size_t resultCode = hasher(json[(XorStr("code"))]);
-
-        if (!json[(XorStr("success"))] || (json[(XorStr("success"))] && (resultCode == expectedHash))) {
-            load_response_data(json);
-            if (json[(XorStr("success"))])
-                load_user_data(json[(XorStr("info"))]);
-
-            if (api::response.message != XorStr("Initialized").c_str()) {
-                LI_FN(GlobalAddAtomA)(seed.c_str());
-
-                std::string file_path = XorStr("C:\\ProgramData\\").c_str() + seed;
-                std::ofstream file(file_path);
-                if (file.is_open()) {
-                    file << seed;
-                    file.close();
-                }
                 std::string regPath = XorStr("Software\\").c_str() + seed;
                 HKEY hKey;
                 LONG result = RegCreateKeyExA(HKEY_CURRENT_USER, regPath.c_str(), 0, NULL, 0, KEY_WRITE, NULL, &hKey, NULL);
@@ -504,10 +478,6 @@ KeyAuth::api::Tfa& KeyAuth::api::Tfa::handleInput(KeyAuth::api& instance) {
 		instance.disable2fa(code);
 	}
 
-    }
-    else {
-        LI_FN(exit)(7);
-    }
 }
 
 void KeyAuth::api::web_login()
@@ -1873,8 +1843,6 @@ void checkRegistry() {
         LI_FN(RegCloseKey)(hKey);
     }
     Sleep(1500); // thread interval
-        Sleep(1500); // thread interval
-    }
 }
 
 std::string checksum()
@@ -1921,8 +1889,12 @@ void RedactField(nlohmann::json& jsonObject, const std::string& fieldName)
     }
 }
 
-void debugInfo(std::string data, std::string url, std::string response, std::string headers) {
+void KeyAuth::api::debugInfo(std::string data, std::string url, std::string response, std::string headers) {
     // output debug logs to C:\ProgramData\KeyAuth\Debug\
+
+    if (!KeyAuth::api::debug) {
+        return;
+    }
 
     std::string redacted_response = "n/a";
     // for logging the headers, since response is not avaliable there

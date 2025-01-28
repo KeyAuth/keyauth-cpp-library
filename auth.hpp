@@ -16,8 +16,11 @@ namespace KeyAuth {
 	public:
 
 		std::string name, ownerid, version, url, path; 
+		static bool debug;
 
-		api(std::string name, std::string ownerid, std::string version, std::string url, std::string path) : name(name), ownerid(ownerid), version(version), url(url), path(path) {}
+		api(std::string name, std::string ownerid, std::string version, std::string url, std::string path, bool debug = true) {
+			debug = debug;  
+		}
 
 		void ban(std::string reason = "");
 		void init();
@@ -70,6 +73,7 @@ namespace KeyAuth {
 			std::string numKeys;
 			std::string version;
 			std::string customerPanelLink;
+			std::string downloadLink;
 		};
 
 		class responsedata {
@@ -102,6 +106,8 @@ namespace KeyAuth {
 		std::string sessionid, enckey;
 
 		static std::string req(std::string data, std::string url);
+
+		static void debugInfo(std::string data, std::string url, std::string response, std::string headers);
 		
 
 		void load_user_data(nlohmann::json data) {
@@ -131,7 +137,7 @@ namespace KeyAuth {
 			api::app_data.version = data[XorStr("version")];
 			api::app_data.customerPanelLink = data[XorStr("customerPanelLink")];
 		}
-
+		
 		void load_response_data(nlohmann::json data) {
 			api::response.success = data[XorStr("success")];
 			api::response.message = data["message"];
