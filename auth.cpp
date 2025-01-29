@@ -78,6 +78,7 @@ std::string signature;
 std::string signatureTimestamp;
 bool initialized;
 std::string API_PUBLIC_KEY = "5586b4bc69c7a4b487e4563a4cd96afd39140f919bd31cea7d1c6a1e8439422b";
+bool KeyAuth::api::debug = false;
 
 void KeyAuth::api::init()
 {
