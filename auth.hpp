@@ -138,8 +138,6 @@ namespace KeyAuth {
 			api::app_data.numKeys = data[XorStr("numKeys")];
 			api::app_data.version = data[XorStr("version")];
 			api::app_data.customerPanelLink = data[XorStr("customerPanelLink")];
-			std::cout << data;
-			//api::app_data.downloadLink = data[XorStr("download")];
 		}
 
 		void load_response_data(nlohmann::json data) {
