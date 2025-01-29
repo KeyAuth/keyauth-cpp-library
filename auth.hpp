@@ -18,8 +18,8 @@ namespace KeyAuth {
 		std::string name, ownerid, version, url, path; 
 		static bool debug;
 
-		api(std::string name, std::string ownerid, std::string version, std::string url, std::string path, bool debug = false) {
-			debug = debug;  
+		api(std::string name, std::string ownerid, std::string version, std::string url, std::string path, bool debugParameter = true) {
+			setDebug(debugParameter);
 		}
 
 		void ban(std::string reason = "");
@@ -108,6 +108,8 @@ namespace KeyAuth {
 		static std::string req(std::string data, std::string url);
 
 		static void debugInfo(std::string data, std::string url, std::string response, std::string headers);
+
+		static void setDebug(bool value);
 		
 
 		void load_user_data(nlohmann::json data) {
@@ -137,7 +139,7 @@ namespace KeyAuth {
 			api::app_data.version = data[XorStr("version")];
 			api::app_data.customerPanelLink = data[XorStr("customerPanelLink")];
 		}
-		
+
 		void load_response_data(nlohmann::json data) {
 			api::response.success = data[XorStr("success")];
 			api::response.message = data["message"];

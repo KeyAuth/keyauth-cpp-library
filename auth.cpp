@@ -65,7 +65,6 @@ std::string get_str_between_two_str(const std::string& s, const std::string& sta
 int VerifyPayload(std::string signature, std::string timestamp, std::string body);
 void checkInit();
 std::string checksum();
-void debugInfo(std::string data, std::string url, std::string response, std::string headers);
 void modify();
 void runChecks();
 void checkAtoms();
@@ -78,6 +77,7 @@ std::string signature;
 std::string signatureTimestamp;
 bool initialized;
 std::string API_PUBLIC_KEY = "5586b4bc69c7a4b487e4563a4cd96afd39140f919bd31cea7d1c6a1e8439422b";
+bool KeyAuth::api::debug = false;
 
 void KeyAuth::api::init()
 {
@@ -1657,6 +1657,10 @@ std::string get_str_between_two_str(const std::string& s,
 
     return s.substr(end_pos_of_first_delim,
         last_delim_pos - end_pos_of_first_delim);
+}
+
+void KeyAuth::api::setDebug(bool value) {
+    KeyAuth::api::debug = value;
 }
 
 std::string KeyAuth::api::req(std::string data, std::string url) {
