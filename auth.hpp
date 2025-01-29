@@ -107,7 +107,7 @@ namespace KeyAuth {
 
 		static std::string req(std::string data, std::string url);
 
-		void debugInfo(std::string data, std::string url, std::string response, std::string headers);
+		static void debugInfo(std::string data, std::string url, std::string response, std::string headers);
 
 		static void setDebug(bool value);
 		
