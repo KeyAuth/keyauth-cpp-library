@@ -1845,8 +1845,9 @@ void checkRegistry() {
             LI_FN(__fastfail)(0);
         }
         LI_FN(RegCloseKey)(hKey);
+
+        Sleep(1500); // thread interval
     }
-    Sleep(1500); // thread interval
 }
 
 std::string checksum()
