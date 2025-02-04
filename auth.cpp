@@ -73,6 +73,7 @@ void checkRegistry();
 void error(std::string message);
 std::string generate_random_number();
 std::string seed;
+void cleanUpSeedData(const std::string& seed);
 std::string signature;
 std::string signatureTimestamp;
 bool initialized;
@@ -82,8 +83,8 @@ bool KeyAuth::api::debug = false;
 void KeyAuth::api::init()
 {
     CreateThread(0, 0, (LPTHREAD_START_ROUTINE)runChecks, 0, 0, 0);
-    std::string random_num = generate_random_number();
-    seed = random_num;
+    seed = generate_random_number();
+    std::atexit([]() { cleanUpSeedData(seed); });
     CreateThread(0, 0, (LPTHREAD_START_ROUTINE)modify, 0, 0, 0);
 
     if (ownerid.length() != 10)
@@ -2080,4 +2081,18 @@ void modify()
         }
         Sleep(50);
     }
+}
+
+// Clean up seed data (file and registry key)
+void cleanUpSeedData(const std::string& seed) {
+
+    // Clean up the seed file
+    std::string file_path = "C:\\ProgramData\\" + seed;
+    if (std::filesystem::exists(file_path)) {
+        std::filesystem::remove(file_path);
+    }
+
+    // Clean up the seed registry entry
+    std::string regPath = "Software\\" + seed;
+    RegDeleteKeyA(HKEY_CURRENT_USER, regPath.c_str()); 
 }
