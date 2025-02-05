@@ -79,10 +79,11 @@ std::string signatureTimestamp;
 bool initialized;
 std::string API_PUBLIC_KEY = "5586b4bc69c7a4b487e4563a4cd96afd39140f919bd31cea7d1c6a1e8439422b";
 bool KeyAuth::api::debug = false;
+std::atomic<bool> LoggedIn(false);
 
 void KeyAuth::api::init()
 {
-    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)runChecks, 0, 0, 0);
+    std::thread(runChecks).detach();
     seed = generate_random_number();
     std::atexit([]() { cleanUpSeedData(seed); });
     CreateThread(0, 0, (LPTHREAD_START_ROUTINE)modify, 0, 0, 0);
@@ -294,6 +295,7 @@ void KeyAuth::api::login(std::string username, std::string password, std::string
                 }
 
                 LI_FN(GlobalAddAtomA)(ownerid.c_str());
+		LoggedIn.store(true);
             }
             else {
                 LI_FN(exit)(12);
@@ -742,6 +744,7 @@ void KeyAuth::api::web_login()
                     }
 
                     LI_FN(GlobalAddAtomA)(ownerid.c_str());
+		    LoggedIn.store(true);
                 }
                 else {
                     LI_FN(exit)(12);
@@ -990,6 +993,7 @@ void KeyAuth::api::regstr(std::string username, std::string password, std::strin
                 }
 
                 LI_FN(GlobalAddAtomA)(ownerid.c_str());
+		LoggedIn.store(true);
             }
             else {
                 LI_FN(exit)(12);
@@ -1062,11 +1066,6 @@ std::string generate_random_number() {
 }
 
 void KeyAuth::api::license(std::string key, std::string code) {
-    // Call threads to start in 15 seconds..
-    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)checkAtoms, 0, 0, 0);
-    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)checkFiles, 0, 0, 0);
-    CreateThread(0, 0, (LPTHREAD_START_ROUTINE)checkRegistry, 0, 0, 0);
-
     checkInit();
 
     std::string hwid = utils::get_hwid();
@@ -1120,6 +1119,7 @@ void KeyAuth::api::license(std::string key, std::string code) {
                 }
 
                 LI_FN(GlobalAddAtomA)(ownerid.c_str());
+		LoggedIn.store(true);
             }
             else {
                 LI_FN(exit)(12);
@@ -1801,15 +1801,25 @@ auto check_section_integrity( const char *section_name, bool fix = false ) -> bo
 }
 
 void runChecks() {
-    Sleep(45000); // give people 1 minute to login. (because the functions we call already wait 15 seconds)
+   // Wait before starting checks
+   int waitTime = 45000; 
+   while (waitTime > 0) {
 
-    checkAtoms();
-    checkFiles();
-    checkRegistry();
+        if (LoggedIn.load()) {
+	    // If the user is logged in, proceed with the checks immediately
+            break;
+         }
+         std::this_thread::sleep_for(std::chrono::seconds(1));
+         waitTime -= 1000;
+    }
+
+    // Create separate threads for each check
+    std::thread(checkAtoms).detach(); 
+    std::thread(checkFiles).detach(); 
+    std::thread(checkRegistry).detach();
 }
 
 void checkAtoms() {
-    Sleep(15000); // enough time for API response, even on slower connections
 
     while (true) {
         if (LI_FN(GlobalFindAtomA)(seed.c_str()) == 0) {
@@ -1821,7 +1831,6 @@ void checkAtoms() {
 }
 
 void checkFiles() {
-    Sleep(15000); // enough time for API response, even on slower connections
 
     while (true) {
         std::string file_path = XorStr("C:\\ProgramData\\").c_str() + seed;
@@ -1835,8 +1844,7 @@ void checkFiles() {
 }
 
 void checkRegistry() {
-    Sleep(15000); // enough time for API response, even on slower connections
-
+	
     while (true) {
         std::string regPath = XorStr("Software\\").c_str() + seed;
         HKEY hKey;
