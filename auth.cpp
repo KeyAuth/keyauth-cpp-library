@@ -1664,40 +1664,41 @@ void KeyAuth::api::setDebug(bool value) {
     KeyAuth::api::debug = value;
 }
 
-std::string KeyAuth::api::req(std::string data, std::string url) {
+std::string KeyAuth::api::req(const std::string& data, const std::string& url) {
+
     CURL* curl = curl_easy_init();
-    if (!curl)
-        return XorStr("null");
+    if (!curl) {
+        error(XorStr("CURL Initialization Failed!"));
+    }
 
     std::string to_return;
     std::string headers;
 
+    // Set CURL options
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
-    
-    curl_easy_setopt(curl, CURLOPT_NOPROXY, XorStr( "keyauth.win" ) );
-    
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
     curl_easy_setopt(curl, CURLOPT_CERTINFO, 1L);
-
+    curl_easy_setopt(curl, CURLOPT_NOPROXY, XorStr("keyauth.win").c_str());
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
-
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &to_return);
-
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &headers);
 
-    auto code = curl_easy_perform(curl);
-
-    if (code != CURLE_OK)
-        error(curl_easy_strerror(code));
+    // Perform the request
+    CURLcode code = curl_easy_perform(curl);
+    if (code != CURLE_OK) {
+        std::string errorMsg = "CURL Error: " + std::string(curl_easy_strerror(code));
+        curl_easy_cleanup(curl);  
+        error(errorMsg);
+    }
 
     debugInfo(data, url, to_return, "Sig: " + signature + "\nTimestamp:" + signatureTimestamp);
-
+    curl_easy_cleanup(curl); 
     return to_return;
 }
+
 void error(std::string message) {
     system((XorStr("start cmd /C \"color b && title Error && echo ").c_str() + message + XorStr(" && timeout /t 5\"")).c_str());
     LI_FN(__fastfail)(0);
