@@ -28,6 +28,8 @@
 #include <http.h>
 #include <stdlib.h>
 #include <atlstr.h>
+#include <ws2tcpip.h>
+#include <winsock2.h>
 
 #include <ctime>
 #include <filesystem>
@@ -1664,7 +1666,72 @@ void KeyAuth::api::setDebug(bool value) {
     KeyAuth::api::debug = value;
 }
 
+bool IsPrivateIP(const struct sockaddr_in& addr)
+{
+    const unsigned char* bytes = reinterpret_cast<const unsigned char*>(&addr.sin_addr);
+
+    if (bytes[0] == 127)
+        return true;
+
+    if (bytes[0] == 10)
+        return true;
+
+    if (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] < 32)
+        return true;
+
+    if (bytes[0] == 192 && bytes[1] == 168)
+        return true;
+
+    return false;
+}
+bool FileCheck(const std::string& domain)
+{
+    WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+    {
+        return true;
+    }
+
+    struct addrinfo* result = nullptr, hints;
+    ZeroMemory(&hints, sizeof(hints));
+    hints.ai_family = AF_INET; // IPv4
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+
+    if (getaddrinfo(domain.c_str(), nullptr, &hints, &result) != 0)
+    {
+        WSACleanup();
+        return true; 
+    }
+
+    bool isPrivateOrLoopback = false;
+    for (struct addrinfo* ptr = result; ptr != nullptr; ptr = ptr->ai_next)
+    {
+        const struct sockaddr_in* ipv4 = reinterpret_cast<const struct sockaddr_in*>(ptr->ai_addr);
+
+        if (IsPrivateIP(*ipv4))
+        {
+            isPrivateOrLoopback = true;
+            break;
+        }
+    }
+
+    freeaddrinfo(result);
+    WSACleanup();
+
+    return isPrivateOrLoopback;
+}
+
+
+
 std::string KeyAuth::api::req(const std::string& data, const std::string& url) {
+
+    if (FileCheck("keyauth.win")) 
+    {
+        error("File manipulation detected. Terminating process.");
+        TerminateProcess(GetCurrentProcess(), 1);
+        return ""; 
+    }
 
     CURL* curl = curl_easy_init();
     if (!curl) {
