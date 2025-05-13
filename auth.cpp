@@ -153,6 +153,20 @@ void KeyAuth::api::init()
 
     std::hash<int> hasher;
     int expectedHash = hasher(42);
+
+    // 4 lines down, used for debug
+    /*std::cout << "[DEBUG] Preparing to verify payload..." << std::endl;
+    std::cout << "[DEBUG] Signature: " << signature << std::endl;
+    std::cout << "[DEBUG] Timestamp: " << signatureTimestamp << std::endl;
+    std::cout << "[DEBUG] Raw body: " << response << std::endl;*/
+
+    if (signature.empty() || signatureTimestamp.empty()) { // used for debug
+        std::cerr << "[ERROR] Signature or timestamp is empty. Cannot verify." << std::endl;
+        MessageBoxA(0, "Missing signature headers in response", "KeyAuth", MB_ICONERROR);
+        exit(99); // Temporary debug exit code
+    }
+
+
     int result = VerifyPayload(signature, signatureTimestamp, response.data());
     if ((hasher(result ^ 0xA5A5) & 0xFFFF) == (expectedHash & 0xFFFF))
     {
@@ -213,31 +227,29 @@ size_t write_callback(void* contents, size_t size, size_t nmemb, void* userp) {
 size_t header_callback(char* buffer, size_t size, size_t nitems, void* userdata) {
     size_t totalSize = size * nitems;
 
-    // Convert the header to a string for easier processing
     std::string header(buffer, totalSize);
 
-    // Find the x-signature-ed25519 header
-    const std::string signatureHeaderName = "x-signature-ed25519: ";
-    if (header.find(signatureHeaderName) == 0) {
-        // Extract the header value
-        signature = header.substr(signatureHeaderName.length());
+    // Convert to lowercase for comparison
+    std::string lowercase = header;
+    std::transform(lowercase.begin(), lowercase.end(), lowercase.begin(), ::tolower);
 
-        // Remove any trailing newline or carriage return characters
+    // Signature
+    if (lowercase.find("x-signature-ed25519: ") == 0) {
+        signature = header.substr(header.find(": ") + 2);
         signature.erase(signature.find_last_not_of("\r\n") + 1);
+        //std::cout << "[DEBUG] Captured signature header: " << signature << std::endl;
     }
 
-    // Find the x-signature-timestamp header
-    const std::string signatureTimeHeaderName = "x-signature-timestamp: ";
-    if (header.find(signatureTimeHeaderName) == 0) {
-        // Extract the header value
-        signatureTimestamp = header.substr(signatureTimeHeaderName.length());
-
-        // Remove any trailing newline or carriage return characters
+    // Timestamp
+    if (lowercase.find("x-signature-timestamp: ") == 0) {
+        signatureTimestamp = header.substr(header.find(": ") + 2);
         signatureTimestamp.erase(signatureTimestamp.find_last_not_of("\r\n") + 1);
+        //std::cout << "[DEBUG] Captured timestamp header: " << signatureTimestamp << std::endl;
     }
 
     return totalSize;
 }
+
 
 void KeyAuth::api::login(std::string username, std::string password, std::string code)
 {
@@ -254,7 +266,7 @@ void KeyAuth::api::login(std::string username, std::string password, std::string
         XorStr("&name=") + name +
         XorStr("&ownerid=") + ownerid;
     auto response = req(data, url);
-
+    //std::cout << "[DEBUG] Login response: " << response << std::endl;
     std::hash<int> hasher;
     int expectedHash = hasher(42);
     int result = VerifyPayload(signature, signatureTimestamp, response.data());
@@ -270,6 +282,8 @@ void KeyAuth::api::login(std::string username, std::string password, std::string
         std::hash<int> hasher;
         size_t expectedHash = hasher(68);
         size_t resultCode = hasher(json[(XorStr("code"))]);
+
+        //std::cout << "[DEBUG] Login response:" << response << std::endl;
 
         if (!json[(XorStr("success"))] || (json[(XorStr("success"))] && (resultCode == expectedHash))) {
             load_response_data(json);
@@ -1587,52 +1601,64 @@ void KeyAuth::api::logout() {
 
 int VerifyPayload(std::string signature, std::string timestamp, std::string body)
 {
-    // Step 1: Convert the string to a long long integer
     long long unix_timestamp = std::stoll(timestamp);
 
-    // Step 2: Get the current time as Unix timestamp (seconds since epoch)
     auto current_time = std::chrono::system_clock::now();
     long long current_unix_time = std::chrono::duration_cast<std::chrono::seconds>(
         current_time.time_since_epoch()).count();
 
-    // Step 3: Compare the timestamps
     if (current_unix_time - unix_timestamp > 20) {
-        // std::cout << "The timestamp is older than 20 seconds." << std::endl;
-        LI_FN(exit)(3);
+        std::cerr << "[ERROR] Timestamp too old (diff = "
+            << (current_unix_time - unix_timestamp) << "s)\n";
+        MessageBoxA(0, "Signature verification failed (timestamp too old)", "KeyAuth", MB_ICONERROR);
+        exit(3);
     }
 
     if (sodium_init() < 0) {
-        // std::cerr << "Failed to initialize sodium" << std::endl;
-        LI_FN(exit)(4);
+        std::cerr << "[ERROR] Failed to initialize libsodium\n";
+        MessageBoxA(0, "Signature verification failed (libsodium init)", "KeyAuth", MB_ICONERROR);
+        exit(4);
     }
 
     std::string message = timestamp + body;
 
     unsigned char sig[64];
     unsigned char pk[32];
-    if (sodium_hex2bin(sig, sizeof(sig), signature.c_str(), signature.length(), NULL, NULL, NULL) != 0)
-    {
-        // std::cerr << "Invalid signature format" << std::endl;
-        LI_FN(exit)(5);
+
+    if (sodium_hex2bin(sig, sizeof(sig), signature.c_str(), signature.length(), NULL, NULL, NULL) != 0) {
+        std::cerr << "[ERROR] Failed to parse signature hex.\n";
+        MessageBoxA(0, "Signature verification failed (invalid signature format)", "KeyAuth", MB_ICONERROR);
+        exit(5);
     }
 
-    if (sodium_hex2bin(pk, sizeof(pk), API_PUBLIC_KEY.c_str(), API_PUBLIC_KEY.length(), NULL, NULL, NULL) != 0)
-    {
-        // std::cerr << "Invalid public key format" << std::endl;
-        LI_FN(exit)(6);
-    };
-
-    if (crypto_sign_ed25519_verify_detached(sig, reinterpret_cast<const unsigned char*>(message.c_str()), message.length(), pk) != 0)
-    {
-        // std::cerr << "Signature verification failed" << std::endl;
-        LI_FN(exit)(7);
+    if (sodium_hex2bin(pk, sizeof(pk), API_PUBLIC_KEY.c_str(), API_PUBLIC_KEY.length(), NULL, NULL, NULL) != 0) {
+        std::cerr << "[ERROR] Failed to parse public key hex.\n";
+        MessageBoxA(0, "Signature verification failed (invalid public key)", "KeyAuth", MB_ICONERROR);
+        exit(6);
     }
 
-    // std::cout << "\n Payload verfied" << std::endl;
-    
+    /*std::cout << "[DEBUG] Timestamp: " << timestamp << std::endl;
+    std::cout << "[DEBUG] Signature: " << signature << std::endl;
+    std::cout << "[DEBUG] Body: " << body << std::endl;
+    std::cout << "[DEBUG] Message (timestamp + body): " << message << std::endl;
+    std::cout << "[DEBUG] Public Key: " << API_PUBLIC_KEY << std::endl;*/
+
+    if (crypto_sign_ed25519_verify_detached(sig,
+        reinterpret_cast<const unsigned char*>(message.c_str()),
+        message.length(),
+        pk) != 0)
+    {
+        std::cerr << "[ERROR] Signature verification failed.\n";
+        MessageBoxA(0, "Signature verification failed (invalid signature)", "KeyAuth", MB_ICONERROR);
+        exit(7);
+    }
+
+    //std::cout << "[DEBUG] Payload verified successfully.\n";
+
     int value = 42 ^ 0xA5A5;
     return value & 0xFFFF;
 }
+
 
 // credits https://stackoverflow.com/a/3790661
 static std::string hexDecode(const std::string& hex)
@@ -1665,6 +1691,8 @@ void KeyAuth::api::setDebug(bool value) {
 }
 
 std::string KeyAuth::api::req(const std::string& data, const std::string& url) {
+    signature.clear();
+    signatureTimestamp.clear();
 
     CURL* curl = curl_easy_init();
     if (!curl) {
